@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NEN 2767 Inspectieformulier</title>
+<script src="mapping.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --bg:#f5f4f0;--sur:#fff;--sur2:#f0efe9;--bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.20);
+  --tx:#1a1a18;--tx2:#5a5a56;--tx3:#9a9a94;
+  --blue:#185FA5;--blue-l:#e6f1fb;
+  --green:#0F6E56;--green-l:#e1f5ee;
+  --amber:#BA7517;--amber-l:#faeeda;
+  --red:#A32D2D;--red-l:#fcebeb;
+  --orange:#C85000;--orange-l:#fdf0e6;
+  --r:8px;--rl:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1a18;--sur:#242422;--sur2:#2e2e2a;--bdr:rgba(255,255,255,.10);--bdr2:rgba(255,255,255,.20);
+  --tx:#f0efe9;--tx2:#a0a09a;--tx3:#606058;--blue-l:#0c447c33;--green-l:#0a4a3533;--amber-l:#63380633;--red-l:#50131333;--orange-l:#5a200033}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:100;background:var(--sur);border-bottom:1px solid var(--bdr);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.topbar-title{font-size:13px;font-weight:600;flex:1;min-width:200px}
+.topbar-sub{font-size:11px;color:var(--tx2)}
+.btn{padding:6px 12px;border:1px solid var(--bdr2);border-radius:var(--r);font-size:11px;cursor:pointer;background:var(--sur);color:var(--tx);display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-family:inherit;transition:background .12s}
+.btn:hover{background:var(--sur2)}.btn.pr{background:var(--blue);color:#fff;border-color:var(--blue)}.btn.pr:hover{background:#134e88}
+.btn.gr{background:var(--green);color:#fff;border-color:var(--green)}.btn.gr:hover{background:#0a5040}
+.btn.or{background:var(--orange);color:#fff;border-color:var(--orange)}
+/* Progress */
+.progress-bar{height:3px;background:var(--sur2);position:sticky;top:57px;z-index:99}
+.progress-fill{height:100%;background:var(--green);transition:width .3s;width:0}
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+/* Card */
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px 18px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+/* Form grid */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.form-group label{font-size:11px;color:var(--tx2);display:block;margin-bottom:3px}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:6px 10px;border:1px solid var(--bdr2);border-radius:var(--r);
+  font-size:12px;background:var(--sur2);color:var(--tx);outline:none;font-family:inherit
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+/* Score legend */
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.lbadge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500}
+/* Section header */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--sur2);border-radius:var(--r);cursor:pointer;margin-bottom:2px;user-select:none}
+.sec-hdr-left{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.sec-hdr-right{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--tx2)}
+.sec-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--blue-l);color:var(--blue)}
+/* Inspection row */
+.insp-table{width:100%;border-collapse:collapse;margin-top:4px}
+.insp-table th{font-size:10px;color:var(--tx3);font-weight:500;padding:6px 8px;text-align:left;border-bottom:1px solid var(--bdr)}
+.insp-table td{padding:6px 8px;border-bottom:1px solid var(--bdr);vertical-align:top}
+.insp-table tr:last-child td{border-bottom:none}
+.insp-table tr:hover td{background:var(--sur2)}
+/* Score buttons */
+.score-btns{display:flex;gap:3px}
+.sc{width:28px;height:28px;border:1px solid var(--bdr2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--sur);color:var(--tx2);display:flex;align-items:center;justify-content:center;transition:all .1s}
+.sc:hover{border-color:var(--bdr2);transform:scale(1.05)}
+.sc.s1.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.sc.s2.active{background:#5BAD3F;color:#fff;border-color:#5BAD3F}
+.sc.s3.active{background:#E8C020;color:#fff;border-color:#E8C020}
+.sc.s4.active{background:#E89020;color:#fff;border-color:#E89020}
+.sc.s5.active{background:#E24B4A;color:#fff;border-color:#E24B4A}
+.sc.s6.active{background:#8B1C1C;color:#fff;border-color:#8B1C1C}
+/* Gebrek checkboxes */
+.gb-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.gb-tag{font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--bdr);cursor:pointer;background:var(--sur);color:var(--tx2);user-select:none;transition:all .1s}
+.gb-tag.sel{background:var(--red-l);color:var(--red);border-color:var(--red)}
+/* Text input inline */
+.inl-input{padding:4px 8px;border:1px solid var(--bdr);border-radius:var(--r);font-size:11px;background:var(--sur2);color:var(--tx);outline:none;font-family:inherit;width:100%}
+.inl-input:focus{border-color:var(--blue)}
+/* Photo upload */
+.photo-zone{border:1px dashed var(--bdr2);border-radius:var(--r);padding:10px;text-align:center;font-size:11px;color:var(--tx3);cursor:pointer;transition:border-color .1s}
+.photo-zone:hover{border-color:var(--blue);color:var(--blue)}
+.photo-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.photo-thumb{position:relative;width:64px;height:64px}
+.photo-thumb img{width:64px;height:64px;object-fit:cover;border-radius:var(--r);border:1px solid var(--bdr)}
+.photo-thumb .del-photo{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);color:#fff;border-radius:50%;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--sur)}
+/* Summary */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.sum-card{background:var(--sur2);border-radius:var(--r);padding:12px;text-align:center}
+.sum-val{font-size:24px;font-weight:500;margin-bottom:2px}
+.sum-lbl{font-size:11px;color:var(--tx2)}
+/* Conditie kleur */
+.ci-1{color:#1D9E75}.ci-2{color:#5BAD3F}.ci-3{color:#E8C020}.ci-4{color:#E89020}.ci-5{color:#E24B4A}.ci-6{color:#8B1C1C}
+/* Final section */
+.final-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* Toast */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--tx);color:var(--bg);padding:9px 15px;border-radius:var(--r);font-size:12px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;max-width:320px}
+.toast.show{opacity:1}
+/* Loading overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;display:none}
+.overlay-box{background:var(--sur);border-radius:var(--rl);padding:24px 32px;text-align:center;font-size:13px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title" id="tbTitle">NEN 2767 Inspectieformulier</div>
+    <div class="topbar-sub" id="tbSub">Laad een beheerobject via de decompositie bibliotheek</div>
+  </div>
+  <div id="tbProgress" style="font-size:11px;color:var(--tx2)"></div>
+  <button class="btn" onclick="history.back()">← Terug</button>
+  <button class="btn" onclick="saveLocal()">💾 Opslaan</button>
+  <button class="btn or" onclick="generatePDF()">📄 PDF rapport</button>
+  <button class="btn pr" onclick="generateWord()">📝 Word rapport</button>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="content" id="content">
+  <div class="card" style="text-align:center;padding:40px">
+    <div style="font-size:40px;opacity:.3;margin-bottom:12px">📋</div>
+    <div style="font-size:14px;font-weight:500;margin-bottom:8px">Geen beheerobject geselecteerd</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:16px">Ga naar de Decompositie Bibliotheek, klik op een Beheerobject<br>en kies "Inspectie starten"</div>
+    <button class="btn pr" onclick="window.location='index.html'">← Naar Decompositie Bibliotheek</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <div style="font-size:24px;margin-bottom:8px">⏳</div>
+    <div id="overlayMsg">Rapport genereren...</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+// ── State ──
+let boName = '', boData = null;
+let scores = {};        // bdKey → 1-6
+let gebreken = {};      // bdKey → [gbName,...]
+let opmerkingen = {};   // bdKey → string
+let acties = {};        // bdKey → string
+let fotonrs = {};       // bdKey → string
+let photos = [];        // [{name, dataUrl}]
+let algInfo = { datum: new Date().toISOString().split('T')[0], inspecteur: '', locatie: '', opdrachtgever: 'Waterschap', object: '', contractnr: '', opmerkingAlg: '' };
+let collapsed = {};
+let allBouwdelen = [];  // flat list [{key, sysLabel, bdName, gbNames}]
+
+// ── Init ──
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function toast(msg,ms=3000){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms) }
+
+window.addEventListener('load', () => {
+  // Read params
+  const params = new URLSearchParams(location.search);
+  boName = params.get('bo') || '';
+  if (!boName) { tryLoadSaved(); return; }
+  algInfo.object = boName;
+  loadBO(boName);
+});
+
+function tryLoadSaved(){
+  const saved = localStorage.getItem('nen2767_insp');
+  if (saved) {
+    try {
+      const d = JSON.parse(saved);
+      boName = d.boName || '';
+      scores = d.scores || {};
+      gebreken = d.gebreken || {};
+      opmerkingen = d.opmerkingen || {};
+      acties = d.acties || {};
+      fotonrs = d.fotonrs || {};
+      algInfo = d.algInfo || algInfo;
+      photos = d.photos || [];
+      if (boName) loadBO(boName);
+    } catch(e) {}
+  }
+}
+
+function loadBO(name) {
+  const sid = S.indexOf(name);
+  if (sid === -1 || !M[sid]) { toast('Beheerobject niet gevonden in mapping'); return; }
+  boData = M[sid];
+  document.getElementById('tbTitle').textContent = 'Inspectie — ' + name;
+  document.getElementById('tbSub').textContent = 'NEN 2767 Conditiemeting';
+  document.title = 'Inspectie ' + name;
+  algInfo.object = name;
+  buildBouwdelenList();
+  renderAll();
+}
+
+function buildBouwdelenList() {
+  allBouwdelen = [];
+  for (const [egSid, elArr] of boData) {
+    for (const [elSid, elM, syArr] of elArr) {
+      for (const [sySid, bdArr] of syArr) {
+        for (const [bdSid, bdM, gbArr] of bdArr) {
+          const bdName = S[bdSid];
+          const syName = S[sySid];
+          const elName = S[elSid];
+          const egName = S[egSid];
+          const gbNames = gbArr.map(g => S[g[0]]);
+          const key = egName + '|' + elName + '|' + syName + '|' + bdName;
+          allBouwdelen.push({ key, egName, elName, syName, bdName, gbNames, meenemen: S[bdM] });
+        }
+      }
+    }
+  }
+}
+
+function renderAll() {
+  const c = document.getElementById('content');
+  let html = '';
+
+  // General info card
+  html += `<div class="card">
+    <div class="card-title">📋 Algemene informatie</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Datum inspectie *</label><input type="date" id="fi_datum" value="${algInfo.datum}" oninput="algInfo.datum=this.value"></div>
+      <div class="form-group"><label>Inspecteur *</label><input type="text" id="fi_insp" placeholder="Naam inspecteur" value="${esc(algInfo.inspecteur)}" oninput="algInfo.inspecteur=this.value"></div>
+      <div class="form-group"><label>Object *</label><input type="text" id="fi_obj" value="${esc(algInfo.object)}" oninput="algInfo.object=this.value"></div>
+      <div class="form-group"><label>Locatie</label><input type="text" id="fi_loc" placeholder="Locatienaam" value="${esc(algInfo.locatie)}" oninput="algInfo.locatie=this.value"></div>
+      <div class="form-group"><label>Opdrachtgever</label><input type="text" id="fi_opdr" value="${esc(algInfo.opdrachtgever)}" oninput="algInfo.opdrachtgever=this.value"></div>
+      <div class="form-group"><label>Contractnummer</label><input type="text" id="fi_contr" placeholder="bijv. SC25200009" value="${esc(algInfo.contractnr)}" oninput="algInfo.contractnr=this.value"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Algemene opmerking</label><textarea id="fi_opm" rows="2" oninput="algInfo.opmerkingAlg=this.value" style="resize:vertical">${esc(algInfo.opmerkingAlg)}</textarea></div>
+    </div>
+  </div>`;
+
+  // Score legend
+  html += `<div class="card">
+    <div class="card-title">📊 Conditiescores NEN 2767</div>
+    <div class="legend">
+      <span class="lbadge" style="background:#e1f5ee;color:#0F6E56">1 — Uitstekend</span>
+      <span class="lbadge" style="background:#eaf3de;color:#3B6D11">2 — Goed</span>
+      <span class="lbadge" style="background:#fdf5c8;color:#7a6000">3 — Redelijk</span>
+      <span class="lbadge" style="background:#faeeda;color:#BA7517">4 — Matig</span>
+      <span class="lbadge" style="background:var(--red-l);color:var(--red)">5 — Slecht</span>
+      <span class="lbadge" style="background:#3a0a0a;color:#f8c4c4">6 — Zeer slecht</span>
+    </div>
+    <div style="font-size:11px;color:var(--tx2)">Klik op een score per bouwdeel. Vink gebreken aan die aanwezig zijn. Voeg foto's toe via de fotozone onderaan.</div>
+  </div>`;
+
+  // Group bouwdelen by elementengroep → element → systeem
+  const byEg = {};
+  for (const bd of allBouwdelen) {
+    if (!byEg[bd.egName]) byEg[bd.egName] = {};
+    if (!byEg[bd.egName][bd.elName]) byEg[bd.egName][bd.elName] = {};
+    if (!byEg[bd.egName][bd.elName][bd.syName]) byEg[bd.egName][bd.elName][bd.syName] = [];
+    byEg[bd.egName][bd.elName][bd.syName].push(bd);
+  }
+
+  for (const [egName, elMap] of Object.entries(byEg)) {
+    const egKey = 'eg_' + egName;
+    const egScored = Object.values(elMap).flatMap(s=>Object.values(s)).flat().filter(b=>scores[b.key]).length;
+    const egTotal  = Object.values(elMap).flatMap(s=>Object.values(s)).flat().length;
+    const isOpen = !collapsed[egKey];
+
+    html += `<div class="card" style="padding:0;overflow:hidden">
+      <div class="sec-hdr" onclick="toggleSec('${egKey}')">
+        <div class="sec-hdr-left">
+          <span style="font-size:16px">${isOpen?'▾':'▸'}</span>
+          <span style="color:#0D7A6E">⬡</span>
+          ${esc(egName)}
+        </div>
+        <div class="sec-hdr-right">
+          <span>${egScored}/${egTotal} beoordeeld</span>
+          ${egScored===egTotal&&egTotal>0?'<span style="color:var(--green)">✓</span>':''}
+        </div>
+      </div>`;
+
+    if (isOpen) {
+      html += `<div style="padding:8px 14px 14px">`;
+      for (const [elName, syMap] of Object.entries(elMap)) {
+        html += `<div style="margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--tx2);margin:8px 0 6px;display:flex;align-items:center;gap:6px">
+            <span style="width:6px;height:6px;border-radius:50%;background:#1D9E75;flex-shrink:0"></span>${esc(elName)}
+          </div>`;
+        for (const [syName, bds] of Object.entries(syMap)) {
+          html += `<div style="margin-left:12px;margin-bottom:8px">
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;display:flex;align-items:center;gap:4px">
+              <span style="width:5px;height:5px;border-radius:50%;background:#5B8C5A;flex-shrink:0"></span>${esc(syName)}
+            </div>
+            <table class="insp-table">
+              <thead><tr>
+                <th style="width:30%">Bouwdeel</th>
+                <th style="width:28%">Conditiescore</th>
+                <th style="width:22%">Actie</th>
+                <th style="width:20%">Fotonr.</th>
+              </tr></thead>
+              <tbody>`;
+          for (const bd of bds) {
+            const k = bd.key;
+            const cur = scores[k] || 0;
+            const actVal = acties[k] || '';
+            const fotoVal = fotonrs[k] || '';
+            html += `<tr>
+              <td>
+                <div style="font-size:11px;font-weight:500">${esc(bd.bdName)}</div>
+                ${bd.meenemen&&bd.meenemen!=='ja'?`<span style="font-size:9px;color:var(--amber)">${esc(bd.meenemen)}</span>`:''}
+                ${bd.gbNames.length?`<div class="gb-list">${bd.gbNames.map(g=>`<span class="gb-tag ${(gebreken[k]||[]).includes(g)?'sel':''}" onclick="toggleGebrek('${k.replace(/'/g,"\\'")}','${g.replace(/'/g,"\\'")}',this)">${esc(g)}</span>`).join('')}</div>`:''}
+                <div style="margin-top:4px"><input class="inl-input" placeholder="Opmerking..." value="${esc(opmerkingen[k]||'')}" oninput="opmerkingen['${k.replace(/'/g,"\\'")}'] = this.value;updateProgress()" style="font-size:10px"></div>
+              </td>
+              <td>
+                <div class="score-btns">
+                  ${[1,2,3,4,5,6].map(n=>`<button class="sc s${n}${cur===n?' active':''}" onclick="setScore('${k.replace(/'/g,"\\'")}',${n},this)">${n}</button>`).join('')}
+                </div>
+              </td>
+              <td>
+                <select class="inl-input" onchange="acties['${k.replace(/'/g,"\\'")}'] = this.value" style="font-size:10px">
+                  <option value="" ${!actVal?'selected':''}>—</option>
+                  <option value="Geen actie" ${actVal==='Geen actie'?'selected':''}>Geen actie</option>
+                  <option value="Monitoren" ${actVal==='Monitoren'?'selected':''}>Monitoren</option>
+                  <option value="Planmatig onderhoud" ${actVal==='Planmatig onderhoud'?'selected':''}>Planmatig</option>
+                  <option value="Correctief onderhoud" ${actVal==='Correctief onderhoud'?'selected':''}>Correctief</option>
+                  <option value="Spoed" ${actVal==='Spoed'?'selected':''}>Spoed</option>
+                </select>
+              </td>
+              <td>
+                <input class="inl-input" placeholder="bijv. 1" value="${esc(fotoVal)}" oninput="fotonrs['${k.replace(/'/g,"\\'")}'] = this.value" style="font-size:10px;text-align:center">
+              </td>
+            </tr>`;
+          }
+          html += `</tbody></table></div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Summary
+  const scored = allBouwdelen.filter(b=>scores[b.key]);
+  const avg = scored.length ? (scored.reduce((s,b)=>s+scores[b.key],0)/scored.length).toFixed(1) : '—';
+  const ci = parseFloat(avg);
+  const ciClass = ci<=1?'ci-1':ci<=2?'ci-2':ci<=3?'ci-3':ci<=4?'ci-4':ci<=5?'ci-5':'ci-6';
+  html += `<div class="card">
+    <div class="card-title">📊 Samenvatting</div>
+    <div class="summary-grid">
+      <div class="sum-card"><div class="sum-val ${ciClass}">${avg}</div><div class="sum-lbl">Gem. conditie-index</div></div>
+      <div class="sum-card"><div class="sum-val">${scored.length}</div><div class="sum-lbl">Bouwdelen beoordeeld</div></div>
+      <div class="sum-card"><div class="sum-val">${allBouwdelen.length}</div><div class="sum-lbl">Totaal bouwdelen</div></div>
+      <div class="sum-card"><div class="sum-val">${allBouwdelen.filter(b=>scores[b.key]>=4).length}</div><div class="sum-lbl">Score ≥ 4 (aandacht)</div></div>
+    </div>
+  </div>`;
+
+  // Final assessment
+  html += `<div class="card">
+    <div class="card-title">✅ Eindbeoordeling</div>
+    <div class="final-grid">
+      <div class="form-group"><label>Algemene staat object</label>
+        <select id="algStaat" onchange="algInfo.algStaat=this.value">
+          <option value="">— Selecteer —</option>
+          <option value="Uitstekend (1)">Uitstekend (1)</option>
+          <option value="Goed (2)">Goed (2)</option>
+          <option value="Redelijk (3)">Redelijk (3)</option>
+          <option value="Matig (4)">Matig (4)</option>
+          <option value="Slecht (5)">Slecht (5)</option>
+          <option value="Zeer slecht (6)">Zeer slecht (6)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Aanbevolen actie</label>
+        <select onchange="algInfo.actieAlg=this.value">
+          <option value="">— Selecteer —</option>
+          <option value="Geen actie vereist">Geen actie vereist</option>
+          <option value="Monitoring">Monitoring</option>
+          <option value="Planmatig onderhoud">Planmatig onderhoud</option>
+          <option value="Correctief onderhoud">Correctief onderhoud</option>
+          <option value="Spoedreparatie">Spoedreparatie</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1"><label>Conclusie / toelichting</label>
+        <textarea rows="3" placeholder="Samenvatting bevindingen..." oninput="algInfo.conclusie=this.value" style="resize:vertical"></textarea>
+      </div>
+    </div>
+  </div>`;
+
+  // Photo section
+  html += `<div class="card">
+    <div class="card-title">📸 Fotorapportage</div>
+    <div class="photo-zone" onclick="document.getElementById('photoInput').click()">
+      + Foto's toevoegen (klik of sleep)
+    </div>
+    <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
+    <div class="photo-grid" id="photoGrid"></div>
+    <div style="font-size:11px;color:var(--tx3);margin-top:8px">Gebruik fotonummers in de tabel hierboven om foto's te koppelen aan bouwdelen.</div>
+  </div>`;
+
+  c.innerHTML = html;
+  renderPhotoGrid();
+  updateProgress();
+}
+
+function toggleSec(key){
+  collapsed[key] = !collapsed[key];
+  renderAll();
+}
+
+function setScore(key, val, btn){
+  scores[key] = val;
+  // Update UI
+  const row = btn.closest('tr');
+  row.querySelectorAll('.sc').forEach((b,i)=>{
+    b.classList.toggle('active', i+1===val);
+  });
+  updateProgress();
+}
+
+function toggleGebrek(key, gbName, el){
+  if (!gebreken[key]) gebreken[key] = [];
+  const idx = gebreken[key].indexOf(gbName);
+  if (idx>=0) gebreken[key].splice(idx,1);
+  else gebreken[key].push(gbName);
+  el.classList.toggle('sel');
+}
+
+function updateProgress(){
+  const scored = allBouwdelen.filter(b=>scores[b.key]).length;
+  const total = allBouwdelen.length;
+  const pct = total ? Math.round(scored/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('tbProgress').textContent = scored+'/'+total+' beoordeeld ('+pct+'%)';
+}
+
+function addPhotos(input){
+  const files = Array.from(input.files);
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      photos.push({ name: file.name, dataUrl: ev.target.result });
+      loaded++;
+      if (loaded===files.length) renderPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderPhotoGrid(){
+  const grid = document.getElementById('photoGrid');
+  if (!grid) return;
+  grid.innerHTML = photos.map((p,i)=>`
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="${esc(p.name)}" title="${esc(p.name)}">
+      <div class="del-photo" onclick="removePhoto(${i})">×</div>
+    </div>`).join('');
+}
+
+function removePhoto(i){ photos.splice(i,1); renderPhotoGrid(); }
+
+function saveLocal(){
+  const data = { boName, scores, gebreken, opmerkingen, acties, fotonrs, algInfo, photos };
+  localStorage.setItem('nen2767_insp', JSON.stringify(data));
+  toast('Opgeslagen in browser ✓');
+}
+
+// ══════════════════════════════════════════════════
+//  PDF GENERATIE — ÆEVO stijl
+// ══════════════════════════════════════════════════
+async function generatePDF(){
+  document.getElementById('overlay').style.display='flex';
+  document.getElementById('overlayMsg').textContent='PDF genereren...';
+  await new Promise(r=>setTimeout(r,100));
+
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W=210, M=20, CW=W-2*M;
+  const orange=[200,80,0], gray=[80,80,78], lightGray=[245,244,240], midGray=[160,160,155];
+  let y=0;
+
+  // ── Page 1: Titelblad ──
+  doc.setFillColor(...orange);
+  doc.rect(0,0,W,8,'F');
+  doc.setFillColor(250,250,248);
+  doc.rect(0,8,W,287,'F');
+
+  // Titel
+  doc.setFontSize(22); doc.setTextColor(...orange); doc.setFont('helvetica','bold');
+  doc.text('NEN 2767 Inspectierapport', W/2, 60, {align:'center'});
+  doc.setFontSize(14); doc.setTextColor(...gray);
+  doc.text(algInfo.object || boName, W/2, 72, {align:'center'});
+
+  // Coverbox
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(M,88,CW,80,3,3,'F');
+  const fields=[
+    ['Datum rapportage', algInfo.datum],
+    ['Opdrachtgever', algInfo.opdrachtgever],
+    ['Object', algInfo.object||boName],
+    ['Locatie', algInfo.locatie],
+    ['Contractnummer', algInfo.contractnr],
+    ['Inspecteur', algInfo.inspecteur],
+  ];
+  let fy=100;
+  doc.setFontSize(10);
+  fields.forEach(([lbl,val])=>{
+    doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+    doc.text(lbl, M+4, fy);
+    doc.setFont('helvetica','normal');
+    doc.text(':  '+(val||'—'), M+48, fy);
+    fy+=9;
+  });
+
+  // Footer strip
+  doc.setFillColor(...orange);
+  doc.rect(0,280,W,17,'F');
+  doc.setFontSize(8); doc.setTextColor(255,255,255); doc.setFont('helvetica','normal');
+  doc.text('NEN 2767 Decompositie Bibliotheek — Fase 2 Conditiemeting', W/2, 290, {align:'center'});
+  doc.text('1/'+estimatePages(), W-M, 290, {align:'right'});
+
+  // ── Page 2: Inhoudsopgave ──
+  doc.addPage();
+  addPageHeader(doc, W, M, orange, gray);
+  y=40;
+  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(...orange);
+  doc.text('INHOUDSOPGAVE', M, y); y+=12;
+  const toc=[['1.','Inleiding',3],['2.','Algemene informatie',3],['3.','Vinklijst conditiemeting',4],['4.','Fotorapportage',estimatePages()]];
+  doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
+  toc.forEach(([nr,title,pg])=>{
+    doc.text(nr, M, y);
+    doc.text(title, M+8, y);
+    doc.text(String(pg), W-M, y, {align:'right'});
+    y+=8;
+  });
+  addPageFooter(doc,W,M,orange,'2/'+estimatePages());
+
+  // ── Page 3: Inleiding + Contactgegevens ──
+  doc.addPage();
+  addPageHeader(doc,W,M,orange,gray);
+  y=40;
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+  doc.text('1.  Inleiding', M, y); y+=8;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  const intro = `Deze rapportage beschrijft de resultaten van de NEN 2767 conditiemeting van ${algInfo.object||boName}, uitgevoerd op ${algInfo.datum} door ${algInfo.inspecteur||'—'}.`;
+  const lines = doc.splitTextToSize(intro, CW);
+  doc.text(lines, M, y); y+=lines.length*5+6;
+  if(algInfo.opmerkingAlg){ const olines=doc.splitTextToSize('Opmerking: '+algInfo.opmerkingAlg,CW); doc.text(olines,M,y); y+=olines.length*5+6; }
+
+  y+=4;
+  doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('2.  Algemene informatie', M, y); y+=8;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  const infoFields=[
+    ['Opdrachtgever',algInfo.opdrachtgever],['Object',algInfo.object||boName],
+    ['Locatie',algInfo.locatie],['Datum',algInfo.datum],
+    ['Inspecteur',algInfo.inspecteur],['Contractnummer',algInfo.contractnr]
+  ];
+  infoFields.forEach(([l,v])=>{
+    doc.setFont('helvetica','bold'); doc.text(l,M,y);
+    doc.setFont('helvetica','normal'); doc.text(': '+(v||'—'),M+42,y);
+    y+=6;
+  });
+  addPageFooter(doc,W,M,orange,'3/'+estimatePages());
+
+  // ── Pages 4+: Vinklijst per elementengroep ──
+  const byEg = {};
+  for (const bd of allBouwdelen) {
+    if (!byEg[bd.egName]) byEg[bd.egName] = {};
+    if (!byEg[bd.egName][bd.elName]) byEg[bd.egName][bd.elName] = {};
+    if (!byEg[bd.egName][bd.elName][bd.syName]) byEg[bd.egName][bd.elName][bd.syName] = [];
+    byEg[bd.egName][bd.elName][bd.syName].push(bd);
+  }
+
+  doc.addPage();
+  addPageHeader(doc,W,M,orange,gray);
+  y=40;
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+  doc.text('3.  Vinklijst conditiemeting — '+( algInfo.object||boName), M, y); y+=6;
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(...midGray);
+  doc.text('Conditiescores: 1=Uitstekend  2=Goed  3=Redelijk  4=Matig  5=Slecht  6=Zeer slecht', M, y); y+=8;
+
+  for (const [egName, elMap] of Object.entries(byEg)) {
+    if (y > 255) { doc.addPage(); addPageHeader(doc,W,M,orange,gray); y=40; }
+    // Elementengroep header
+    doc.setFillColor(...orange);
+    doc.rect(M,y,CW,7,'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text(egName, M+3, y+5);
+    y+=9;
+
+    for (const [elName, syMap] of Object.entries(elMap)) {
+      if (y > 258) { doc.addPage(); addPageHeader(doc,W,M,orange,gray); y=40; }
+      // Element subheader
+      doc.setFillColor(235,235,230);
+      doc.rect(M,y,CW,6,'F');
+      doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+      doc.text('  '+elName, M, y+4.5);
+      y+=7;
+
+      // Rows
+      for (const [syName, bds] of Object.entries(syMap)) {
+        // Systeem label
+        doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...midGray);
+        doc.text('    '+syName, M, y+3.5);
+        y+=5;
+
+        const rows = bds.map(bd => {
+          const sc = scores[bd.key] || '';
+          const act = acties[bd.key] || '';
+          const gb = (gebreken[bd.key]||[]).join(', ');
+          const opm = opmerkingen[bd.key] || '';
+          const fot = fotonrs[bd.key] || '';
+          return [bd.bdName, String(sc), act, gb||opm, fot];
+        });
+
+        doc.autoTable({
+          startY: y,
+          margin: { left: M, right: M },
+          head: [['Bouwdeel','Score','Actie','Opmerkingen/Gebreken','Foto nr.']],
+          body: rows,
+          theme: 'plain',
+          styles: { fontSize: 7.5, cellPadding: 1.5, textColor: gray, lineColor: [220,220,215], lineWidth: 0.2 },
+          headStyles: { fillColor: lightGray, textColor: gray, fontStyle: 'bold', fontSize: 7.5 },
+          columnStyles: { 0:{cellWidth:50}, 1:{cellWidth:12,halign:'center'}, 2:{cellWidth:32}, 3:{cellWidth:60}, 4:{cellWidth:16,halign:'center'} },
+          didParseCell: (data)=>{
+            if (data.column.index===1 && data.section==='body') {
+              const sc = parseInt(data.cell.raw);
+              if (sc===1) data.cell.styles.textColor=[15,110,86];
+              else if (sc===2) data.cell.styles.textColor=[60,140,45];
+              else if (sc===3) data.cell.styles.textColor=[180,140,0];
+              else if (sc===4) data.cell.styles.textColor=[186,117,23];
+              else if (sc===5) data.cell.styles.textColor=[163,45,45];
+              else if (sc===6) data.cell.styles.textColor=[100,0,0];
+              if (sc) data.cell.styles.fontStyle='bold';
+            }
+          }
+        });
+        y = doc.lastAutoTable.finalY + 3;
+      }
+    }
+    y+=4;
+  }
+
+  // Samenvatting
+  if (y > 240) { doc.addPage(); addPageHeader(doc,W,M,orange,gray); y=40; }
+  const scored2 = allBouwdelen.filter(b=>scores[b.key]);
+  const avg2 = scored2.length ? (scored2.reduce((s,b)=>s+scores[b.key],0)/scored2.length).toFixed(1) : '—';
+  doc.setFillColor(240,248,240);
+  doc.roundedRect(M,y,CW,28,2,2,'F');
+  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+  doc.text('Samenvatting', M+4, y+7);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Gemiddelde conditie-index: '+avg2, M+4, y+14);
+  doc.text('Beoordeeld: '+scored2.length+' van '+allBouwdelen.length+' bouwdelen', M+4, y+20);
+  if(algInfo.algStaat) doc.text('Algemene staat: '+algInfo.algStaat, M+80, y+14);
+  if(algInfo.actieAlg) doc.text('Aanbevolen actie: '+algInfo.actieAlg, M+80, y+20);
+  y+=32;
+  if(algInfo.conclusie){
+    const cl=doc.splitTextToSize('Conclusie: '+algInfo.conclusie,CW);
+    doc.setFontSize(9); doc.text(cl,M,y); y+=cl.length*5;
+  }
+  addPageFooter(doc,W,M,orange,'4/'+estimatePages());
+
+  // ── Fotorapportage ──
+  if (photos.length>0) {
+    doc.addPage();
+    addPageHeader(doc,W,M,orange,gray);
+    y=40;
+    doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+    doc.text('4.  Fotorapportage', M, y); y+=10;
+
+    // Grid 2x3
+    doc.setFillColor(...orange);
+    doc.rect(M,y,CW,8,'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text('BIJBEHORENDE FOTO\'S', W/2, y+5.5, {align:'center'});
+    y+=10;
+
+    const imgW=82, imgH=55, cols=2, gap=6;
+    let col=0;
+    let px=M;
+    for (let i=0;i<photos.length;i++){
+      if (col===0 && i>0 && col===0) px=M;
+      doc.setFillColor(255,240,230);
+      doc.rect(px,y,imgW,imgH+10,'F');
+      try { doc.addImage(photos[i].dataUrl,'JPEG',px+1,y+1,imgW-2,imgH-2); } catch(e){}
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
+      doc.text('Fotonr.: '+(i+1), px+3, y+imgH+7);
+      col++;
+      px += imgW+gap;
+      if (col>=cols){ col=0; px=M; y+=imgH+14;
+        if (y>250&&i<photos.length-1){ doc.addPage(); addPageHeader(doc,W,M,orange,gray); y=40; }
+      }
+    }
+  }
+
+  document.getElementById('overlay').style.display='none';
+  doc.save('NEN2767_Inspectierapport_'+(algInfo.object||boName).replace(/\s+/g,'_')+'_'+algInfo.datum+'.pdf');
+  toast('PDF gegenereerd ✓');
+}
+
+function addPageHeader(doc,W,M,orange,gray){
+  doc.setFillColor(...orange);
+  doc.rect(0,0,W,8,'F');
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+  doc.text('NEN 2767 Inspectierapport — '+(algInfo.object||boName), M, 5.5);
+  doc.text(algInfo.datum||'', W-M, 5.5, {align:'right'});
+  doc.setDrawColor(220,220,215); doc.setLineWidth(0.2);
+  doc.line(M, 12, W-M, 12);
+}
+
+function addPageFooter(doc,W,M,orange,pgLabel){
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(160,160,155);
+  doc.text(pgLabel, W-M, 290, {align:'right'});
+}
+
+function estimatePages(){ return 4+(photos.length>0?Math.ceil(photos.length/4):0); }
+
+// ── Word (HTML→download) ──
+function generateWord(){
+  const scored2=allBouwdelen.filter(b=>scores[b.key]);
+  const avg2=scored2.length?(scored2.reduce((s,b)=>s+scores[b.key],0)/scored2.length).toFixed(1):'—';
+  let rows='';
+  for(const bd of allBouwdelen){
+    const sc=scores[bd.key]||'';
+    const scColor=sc<=2?'green':sc<=3?'olive':sc<=4?'darkorange':sc>4?'red':'';
+    rows+=`<tr><td>${esc(bd.egName)}</td><td>${esc(bd.elName)}</td><td>${esc(bd.syName)}</td><td>${esc(bd.bdName)}</td><td style="color:${scColor};font-weight:bold;text-align:center">${sc||'—'}</td><td>${esc(acties[bd.key]||'')}</td><td>${esc((gebreken[bd.key]||[]).join(', '))}</td><td>${esc(opmerkingen[bd.key]||'')}</td><td style="text-align:center">${esc(fotonrs[bd.key]||'')}</td></tr>`;
+  }
+  const html=`<html><head><meta charset="UTF-8">
+  <style>body{font-family:Arial,sans-serif;font-size:10pt;color:#3d3d3a}
+  h1{color:#C85000;font-size:16pt}h2{font-size:12pt;color:#3d3d3a;margin-top:16pt}
+  table{border-collapse:collapse;width:100%}th{background:#C85000;color:#fff;padding:4pt 6pt;font-size:8pt}
+  td{border:0.5pt solid #ddd;padding:3pt 5pt;font-size:8pt}tr:nth-child(even)td{background:#f9f9f6}
+  .meta{margin-bottom:12pt}.meta tr td:first-child{font-weight:bold;width:120pt;color:#666}
+  .meta td{border:none;padding:2pt 4pt}.sum{background:#e8f5e9;padding:8pt;border-radius:4pt;margin:12pt 0}
+  </style></head><body>
+  <h1>NEN 2767 Inspectierapport</h1>
+  <h2>${esc(algInfo.object||boName)}</h2>
+  <table class="meta">
+    <tr><td>Datum</td><td>${esc(algInfo.datum)}</td></tr>
+    <tr><td>Inspecteur</td><td>${esc(algInfo.inspecteur)}</td></tr>
+    <tr><td>Opdrachtgever</td><td>${esc(algInfo.opdrachtgever)}</td></tr>
+    <tr><td>Locatie</td><td>${esc(algInfo.locatie)}</td></tr>
+    <tr><td>Contractnummer</td><td>${esc(algInfo.contractnr)}</td></tr>
+  </table>
+  <div class="sum">Gemiddelde conditie-index: <strong>${avg2}</strong> &nbsp;|&nbsp; Beoordeeld: ${scored2.length} van ${allBouwdelen.length} bouwdelen${algInfo.algStaat?' &nbsp;|&nbsp; Staat: <strong>'+esc(algInfo.algStaat)+'</strong>':''}</div>
+  <h2>Conditiemeting vinklijst</h2>
+  <table>
+    <tr><th>Elementengroep</th><th>Element</th><th>Systeem</th><th>Bouwdeel</th><th>Score</th><th>Actie</th><th>Gebreken</th><th>Opmerkingen</th><th>Foto nr.</th></tr>
+    ${rows}
+  </table>
+  ${algInfo.conclusie?`<h2>Conclusie</h2><p>${esc(algInfo.conclusie)}</p>`:''}
+  </body></html>`;
+  const blob=new Blob([html],{type:'application/msword'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='NEN2767_Inspectierapport_'+(algInfo.object||boName).replace(/\s+/g,'_')+'_'+algInfo.datum+'.doc';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Word rapport gedownload ✓');
+}
+</script>
+</body>
+</html>
