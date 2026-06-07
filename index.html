@@ -6,13 +6,15 @@
 <title>NEN 2767 Decompositie Bibliotheek</title>
 <script src="mapping.js"></script>
 <style>
-:root{--bg:#f5f4f0;--sur:#fff;--sur2:#f0efe9;--bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.20);--tx:#1a1a18;--tx2:#5a5a56;--tx3:#9a9a94;--blue:#185FA5;--blue-l:#e6f1fb;--red:#A32D2D;--red-l:#fcebeb;--green:#0F6E56;--r:8px;--rl:12px}
-@media(prefers-color-scheme:dark){:root{--bg:#1a1a18;--sur:#242422;--sur2:#2e2e2a;--bdr:rgba(255,255,255,.10);--bdr2:rgba(255,255,255,.20);--tx:#f0efe9;--tx2:#a0a09a;--tx3:#606058;--blue-l:#0c447c22;--red-l:#50131322}}
+:root{--bg:#f5f4f0;--sur:#fff;--sur2:#f0efe9;--bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.20);--tx:#1a1a18;--tx2:#5a5a56;--tx3:#9a9a94;--blue:#185FA5;--blue-l:#e6f1fb;--green:#0F6E56;--green-l:#e1f5ee;--red:#A32D2D;--red-l:#fcebeb;--r:8px;--rl:12px}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a18;--sur:#242422;--sur2:#2e2e2a;--bdr:rgba(255,255,255,.10);--bdr2:rgba(255,255,255,.20);--tx:#f0efe9;--tx2:#a0a09a;--tx3:#606058;--blue-l:#0c447c22;--green-l:#0a4a3522;--red-l:#50131322}}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;height:100vh;overflow:hidden}
 .app{display:flex;height:100vh}
-/* Sidebar */
 .sidebar{width:300px;min-width:220px;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.detail{width:290px;background:var(--sur);border-left:1px solid var(--bdr);overflow-y:auto;flex-shrink:0;display:none}
+.detail.open{display:block}
 .sb-hdr{padding:10px 12px;border-bottom:1px solid var(--bdr)}
 .sb-search{width:100%;padding:6px 10px;border:1px solid var(--bdr2);border-radius:var(--r);font-size:12px;background:var(--sur2);color:var(--tx);outline:none;font-family:inherit;margin-top:7px}
 .sb-search:focus{border-color:var(--blue)}
@@ -20,7 +22,7 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 .stab{flex:1;padding:7px 2px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;border:none;background:transparent;color:var(--tx2);border-bottom:2px solid transparent;font-family:inherit}
 .stab.active{color:var(--blue);border-bottom-color:var(--blue)}.stab:hover:not(.active){background:var(--sur2)}
 .sb-mode{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--bdr)}
-.mdbtn{flex:1;padding:5px 4px;border:1px solid var(--bdr2);border-radius:var(--r);font-size:10px;font-weight:600;cursor:pointer;background:var(--sur);color:var(--tx2);text-align:center;font-family:inherit}
+.mdbtn{flex:1;padding:5px 4px;border:1px solid var(--bdr2);border-radius:var(--r);font-size:10px;font-weight:600;cursor:pointer;background:var(--sur);color:var(--tx2);text-align:center;font-family:inherit;transition:all .12s}
 .mdbtn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .sb-count{font-size:10px;color:var(--tx3);padding:4px 12px;border-bottom:1px solid var(--bdr)}
 .lib-list{flex:1;overflow-y:auto;padding:5px}
@@ -29,16 +31,14 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 .lib-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .lib-code{font-size:10px;color:var(--tx3);margin-left:auto;font-family:monospace;background:var(--bg);padding:1px 5px;border-radius:20px;white-space:nowrap;border:1px solid var(--bdr);flex-shrink:0}
 .auto-badge{font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:20px;flex-shrink:0}
-/* Main */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hdr{padding:10px 12px;border-bottom:1px solid var(--bdr);background:var(--sur);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .hdr-title{font-size:12px;font-weight:600;flex:1;min-width:100px}
 .btn{padding:5px 9px;border:1px solid var(--bdr2);border-radius:var(--r);font-size:11px;cursor:pointer;background:var(--sur);color:var(--tx);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-family:inherit;transition:background .12s}
 .btn:hover{background:var(--sur2)}.btn.pr{background:var(--blue);color:#fff;border-color:var(--blue)}.btn.pr:hover{background:#134e88}
+.btn.gr{background:var(--green);color:#fff;border-color:var(--green)}.btn.gr:hover{background:#0a5040}
 .btn.dan{color:var(--red);border-color:var(--red);background:var(--red-l)}
 .canvas{flex:1;overflow:auto;padding:14px}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:10px;color:var(--tx2);text-align:center}
-/* Tree nodes */
 .node-block{user-select:none;-webkit-user-select:none}
 .node-row{display:flex;align-items:stretch}
 .node-indent{display:flex}
@@ -55,14 +55,10 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 .ncnt{font-size:10px;background:var(--sur);border:1px solid var(--bdr);color:var(--tx3);padding:0 4px;border-radius:20px;flex-shrink:0}
 .mbadge{font-size:9px;padding:1px 5px;border-radius:20px;flex-shrink:0;border:1px solid}
 .mbadge.opt{background:#faeeda;color:#854F0B;border-color:#BA7517}
-.mbadge.nee{background:var(--red-l);color:var(--red);border-color:var(--red)}
 .nact{display:flex;gap:2px;opacity:0}.node-body:hover .nact{opacity:1}
 .na{width:20px;height:20px;border:none;background:transparent;cursor:pointer;color:var(--tx2);font-size:12px;display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0}
 .na:hover{background:var(--sur);color:var(--tx)}
-/* Detail */
-.detail{width:290px;background:var(--sur);border-left:1px solid var(--bdr);overflow-y:auto;flex-shrink:0;display:none}
-.detail.open{display:block}
-.dp-hdr{padding:11px 13px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.detail .dp-hdr{padding:11px 13px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
 .dp-ttl{font-size:12px;font-weight:600}
 .dp-body{padding:13px}
 .dpf{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}.dpf:last-child{border:none}
@@ -70,7 +66,6 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 .dpv{font-size:12px;color:var(--tx);line-height:1.5}
 .tbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500}
 .dp-acts{display:flex;flex-direction:column;gap:6px;margin-top:12px}
-/* Modal */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000}
 .mbox{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:20px;width:400px;max-width:95vw;box-shadow:0 4px 20px rgba(0,0,0,.15)}
 .mbox h3{font-size:14px;font-weight:600;margin-bottom:13px}
@@ -78,32 +73,16 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 .fr input,.fr select,.fr textarea{width:100%;padding:7px 10px;border:1px solid var(--bdr2);border-radius:var(--r);font-size:12px;background:var(--sur2);color:var(--tx);outline:none;font-family:inherit}
 .fr input:focus,.fr select:focus{border-color:var(--blue)}
 .mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:13px}
-/* Toast */
 .toast{position:fixed;bottom:18px;right:18px;background:var(--tx);color:var(--bg);padding:9px 15px;border-radius:var(--r);font-size:12px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;max-width:340px}
 .toast.show{opacity:1}
-/* Loading */
-.loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;gap:14px}
-.spinner{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
 </style>
 </head>
 <body>
-
-<div class="loading" id="loading">
-  <div class="spinner"></div>
-  <div style="font-size:14px;font-weight:600">NEN 2767 Decompositie Bibliotheek</div>
-  <div style="font-size:12px;color:var(--tx3)">64 beheerobjecten · 245 elementen · 760 bouwdelen · 166 gebreken</div>
-</div>
-
-<div class="app" id="app" style="display:none">
-
-  <!-- ═══ SIDEBAR ═══ -->
+<div class="app" id="app">
   <div class="sidebar">
     <div class="sb-hdr">
-      <div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
-        📚 NEN 2767 Bibliotheek
-      </div>
+      <div style="font-size:12px;font-weight:600">📚 NEN 2767 Bibliotheek</div>
       <input class="sb-search" id="libSearch" type="text" placeholder="Zoeken op naam of code…" autocomplete="off">
     </div>
     <div class="sb-tabs">
@@ -113,30 +92,29 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
       <button class="stab" id="tab-gb" onclick="switchTab('gb')">Gebreken<br><span style="font-weight:400;opacity:.7">166</span></button>
     </div>
     <div class="sb-mode">
-      <button class="mdbtn active" id="mode-auto" onclick="setMode('auto')" title="Sleep een Beheerobject — volledige hiërarchie wordt automatisch opgebouwd">🔗 Automatisch</button>
-      <button class="mdbtn" id="mode-hand" onclick="setMode('hand')" title="Voeg items één voor één handmatig toe">✋ Handmatig</button>
+      <button class="mdbtn active" id="mode-auto" onclick="setMode('auto')" title="Sleep een Beheerobject → volledige hiërarchie automatisch">🔗 Automatisch</button>
+      <button class="mdbtn" id="mode-hand" onclick="setMode('hand')" title="Items één voor één handmatig toevoegen">✋ Handmatig</button>
     </div>
     <div class="sb-count" id="libCount"></div>
     <div class="lib-list" id="libList"></div>
   </div>
 
-  <!-- ═══ MAIN ═══ -->
   <div class="main">
     <div class="hdr">
       <span class="hdr-title">🏗 NEN 2767 Decompositie Bibliotheek &nbsp;<span style="font-weight:400;color:var(--tx3);font-size:11px">Fase 1</span></span>
       <button class="btn pr" onclick="openAddModal('portfolio',null)">＋ Nieuw Areaal</button>
       <button class="btn" onclick="expandAll()">▾ Uitvouwen</button>
       <button class="btn" onclick="collapseAll()">▴ Invouwen</button>
-      <button class="btn" onclick="exportJSON()">⬇ JSON</button>
-      <button class="btn" onclick="exportCSV()">⬇ Excel/CSV</button>
-      <button class="btn" onclick="importJSON()">⬆ Importeer</button>
+      <button class="btn" onclick="saveToFile()" title="Sla decompositie op als JSON-bestand">💾 Opslaan</button>
+      <button class="btn" onclick="document.getElementById('loadInput').click()" title="Laad eerder opgeslagen decompositie">📂 Laden</button>
+      <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadFromFile(this)">
+      <button class="btn" onclick="exportCSV()">⬇ Excel</button>
     </div>
     <div class="canvas" id="canvas">
       <div id="treeRoot"></div>
     </div>
   </div>
 
-  <!-- ═══ DETAIL ═══ -->
   <div class="detail" id="detailPanel">
     <div class="dp-hdr">
       <span class="dp-ttl" id="dpTitle">Details</span>
@@ -152,122 +130,79 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  TYPE CONFIG
-// ════════════════════════════════════════════════════════
-const TLBL = {
-  portfolio: 'Areaal Portefeuille',
-  complex:   'Complex',
-  bo:        'Beheerobject',
-  eg:        'Elementengroep',
-  el:        'Element',
-  sy:        'Systeem',
-  bd:        'Bouwdeel',
-  gb:        'Gebrek'
-};
-const TCOL = {
-  portfolio: '#534AB7',
-  complex:   '#185FA5',
-  bo:        '#378ADD',
-  eg:        '#0D7A6E',
-  el:        '#1D9E75',
-  sy:        '#5B8C5A',
-  bd:        '#BA7517',
-  gb:        '#E24B4A'
-};
-// Valid child types per parent type
-const KIDS = {
-  portfolio: ['complex'],
-  complex:   ['bo'],
-  bo:        ['eg'],
-  eg:        ['el'],
-  el:        ['sy'],
-  sy:        ['bd'],
-  bd:        ['gb'],
-  gb:        []
-};
-// Library data arrays (from mapping.js: BO, EL, BD, GB)
-const LIB = { bo: BO, el: EL, bd: BD, gb: GB };
+// ════════════════════════════════════════
+const TLBL={portfolio:'Areaal Portefeuille',complex:'Complex',bo:'Beheerobject',eg:'Elementengroep',el:'Element',sy:'Systeem',bd:'Bouwdeel',gb:'Gebrek'};
+const TCOL={portfolio:'#534AB7',complex:'#185FA5',bo:'#378ADD',eg:'#0D7A6E',el:'#1D9E75',sy:'#5B8C5A',bd:'#BA7517',gb:'#E24B4A'};
+const KIDS={portfolio:['complex'],complex:['bo'],bo:['eg'],eg:['el'],el:['sy'],sy:['bd'],bd:['gb'],gb:[]};
+const LIB={bo:BO,el:EL,bd:BD,gb:GB};
 
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  STATE
-// ════════════════════════════════════════════════════════
-let tree = [], idC = 1, activeTab = 'bo', libMode = 'auto';
-let selId = null, coll = {}, dragLib = null, dragNid = null;
+// ════════════════════════════════════════
+let tree=[],idC=1,activeTab='bo',libMode='auto',selId=null,coll={},dragLib=null,dragNid=null;
+const mkId=()=>'n'+(idC++);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const toast=(msg,ms=3000)=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms)};
 
-const mkId = () => 'n' + (idC++);
-const esc  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function findN(id,ns=tree){for(const n of ns){if(n.id===id)return n;if(n.children){const r=findN(id,n.children);if(r)return r;}}return null}
+function findP(id,ns=tree,p=null){for(const n of ns){if(n.id===id)return p;if(n.children){const r=findP(id,n.children,n);if(r)return r;}}return null}
+function countD(n){let c=(n.children||[]).length;(n.children||[]).forEach(x=>c+=countD(x));return c}
+function addKid(par,child){if(!par.children)par.children=[];par.children.push(child)}
+function findFirstOfType(type,ns=tree){for(const n of ns){if(n.type===type)return n;if(n.children){const r=findFirstOfType(type,n.children);if(r)return r;}}return null}
+function libCode(type,name){return LIB[type]?.find(x=>x.n===name)?.c||''}
 
-function findN(id, ns = tree) {
-  for (const n of ns) {
-    if (n.id === id) return n;
-    if (n.children) { const r = findN(id, n.children); if (r) return r; }
-  }
-  return null;
-}
-function findP(id, ns = tree, p = null) {
-  for (const n of ns) {
-    if (n.id === id) return p;
-    if (n.children) { const r = findP(id, n.children, n); if (r) return r; }
-  }
-  return null;
-}
-function countD(n) {
-  let c = (n.children||[]).length;
-  (n.children||[]).forEach(x => c += countD(x));
-  return c;
-}
-function addKid(par, child) {
-  if (!par.children) par.children = [];
-  par.children.push(child);
-}
-function findFirstOfType(type, ns = tree) {
-  for (const n of ns) {
-    if (n.type === type) return n;
-    if (n.children) { const r = findFirstOfType(type, n.children); if (r) return r; }
-  }
-  return null;
-}
-function libCode(type, name) {
-  return LIB[type]?.find(x => x.n === name)?.c || '';
+// ════════════════════════════════════════
+//  AUTO-SAVE naar localStorage (achtergrond)
+//  zodat terug navigeren vanuit inspectie.html
+//  de decompositie NIET verliest
+// ════════════════════════════════════════
+const LS_KEY = 'nen2767_decompositie_v2';
+
+function autoSave(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({tree, idC, timestamp: Date.now()}));
+  }catch(e){}
 }
 
-// ════════════════════════════════════════════════════════
-//  SMART TREE BUILDER — one BO → full hierarchy
-// ════════════════════════════════════════════════════════
-function buildBoTree(boName) {
-  const boSid = S.indexOf(boName);
-  if (boSid === -1 || !M[boSid]) return null;
-  const boNode = {
-    id: mkId(), type: 'bo', label: boName,
-    code: BO.find(x=>x.n===boName)?.c || '', children: []
-  };
-  for (const [egSid, elArr] of M[boSid]) {
-    const egNode = { id: mkId(), type: 'eg', label: S[egSid], code: '', children: [] };
-    for (const [elSid, elM, syArr] of elArr) {
-      const elName = S[elSid];
-      const elNode = {
-        id: mkId(), type: 'el', label: elName,
-        code: EL.find(x=>x.n===elName)?.c || '',
-        meenemen: S[elM], children: []
-      };
-      for (const [sySid, bdArr] of syArr) {
-        const syNode = { id: mkId(), type: 'sy', label: S[sySid], code: '', children: [] };
-        for (const [bdSid, bdM, gbArr] of bdArr) {
-          const bdName = S[bdSid];
-          const bdNode = {
-            id: mkId(), type: 'bd', label: bdName,
-            code: BD.find(x=>x.n===bdName)?.c || '',
-            meenemen: S[bdM], children: []
-          };
-          for (const [gbSid, ggSid, gsSid, gbM] of gbArr) {
-            const gbName = S[gbSid];
-            bdNode.children.push({
-              id: mkId(), type: 'gb', label: gbName,
-              code: GB.find(x=>x.n===gbName)?.c || '',
-              gebrekgroep: S[ggSid], gebreksoort: S[gsSid],
-              meenemen: S[gbM], children: []
-            });
+function autoLoad(){
+  try{
+    const saved = localStorage.getItem(LS_KEY);
+    if(!saved) return false;
+    const data = JSON.parse(saved);
+    if(data.tree && data.tree.length > 0){
+      tree = data.tree;
+      idC = data.idC || 1;
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// Auto-save elke 10 seconden en bij elke tree-wijziging
+setInterval(autoSave, 10000);
+
+// ════════════════════════════════════════
+//  SMART TREE BUILDER
+// ════════════════════════════════════════
+function buildBoTree(boName){
+  const boSid=S.indexOf(boName);
+  if(boSid===-1||!M[boSid])return null;
+  const boNode={id:mkId(),type:'bo',label:boName,code:BO.find(x=>x.n===boName)?.c||'',children:[]};
+  for(const [egSid,elArr] of M[boSid]){
+    const egNode={id:mkId(),type:'eg',label:S[egSid],code:'',children:[]};
+    for(const [elSid,elM,syArr] of elArr){
+      const elName=S[elSid];
+      const elNode={id:mkId(),type:'el',label:elName,code:EL.find(x=>x.n===elName)?.c||'',meenemen:S[elM],children:[]};
+      for(const [sySid,bdArr] of syArr){
+        const syNode={id:mkId(),type:'sy',label:S[sySid],code:'',children:[]};
+        for(const [bdSid,bdM,gbArr] of bdArr){
+          const bdName=S[bdSid];
+          const bdNode={id:mkId(),type:'bd',label:bdName,code:BD.find(x=>x.n===bdName)?.c||'',meenemen:S[bdM],children:[]};
+          for(const [gbSid,ggSid,gsSid,gbM] of gbArr){
+            const gbName=S[gbSid];
+            bdNode.children.push({id:mkId(),type:'gb',label:gbName,code:GB.find(x=>x.n===gbName)?.c||'',gebrekgroep:S[ggSid],meenemen:S[gbM],children:[]});
           }
           syNode.children.push(bdNode);
         }
@@ -280,90 +215,64 @@ function buildBoTree(boName) {
   return boNode;
 }
 
-// ════════════════════════════════════════════════════════
-//  LIBRARY PANEL
-// ════════════════════════════════════════════════════════
-function switchTab(t) {
-  activeTab = t;
-  ['bo','el','bd','gb'].forEach(x =>
-    document.getElementById('tab-' + x).classList.toggle('active', x === t));
-  renderLib();
-}
-function setMode(m) {
-  libMode = m;
-  document.getElementById('mode-auto').classList.toggle('active', m === 'auto');
-  document.getElementById('mode-hand').classList.toggle('active', m === 'hand');
-  renderLib();
-}
+// ════════════════════════════════════════
+//  LIBRARY
+// ════════════════════════════════════════
+function switchTab(t){activeTab=t;['bo','el','bd','gb'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));renderLib()}
+function setMode(m){libMode=m;document.getElementById('mode-auto').classList.toggle('active',m==='auto');document.getElementById('mode-hand').classList.toggle('active',m==='hand');renderLib()}
 
-function renderLib() {
-  const q   = (document.getElementById('libSearch').value || '').toLowerCase();
-  const arr = LIB[activeTab];
-  const items = arr.filter(i =>
-    !q || i.n.toLowerCase().includes(q) || (i.c && i.c.toString().toLowerCase().includes(q))
-  );
-  const cl = { bo:'#378ADD', el:'#1D9E75', bd:'#BA7517', gb:'#E24B4A' }[activeTab];
-  const isAuto = libMode === 'auto' && activeTab === 'bo';
-
-  document.getElementById('libCount').textContent =
-    isAuto
-      ? `🔗 Automatisch — versleep een beheerobject voor volledige hiërarchie`
-      : `${items.length} van ${arr.length} items`;
-
-  const list = document.getElementById('libList');
-  if (!items.length) {
-    list.innerHTML = '<div style="text-align:center;padding:20px;font-size:11px;color:var(--tx3)">Geen resultaten</div>';
-    return;
-  }
-  list.innerHTML = items.map(i => `
-    <div class="lib-item" draggable="true" data-type="${activeTab}" data-name="${esc(i.n)}"
-      title="${esc(i.n)}${isAuto ? ' → volledige decompositie automatisch' : ''}">
+function renderLib(){
+  const q=(document.getElementById('libSearch').value||'').toLowerCase();
+  const arr=LIB[activeTab];
+  const items=arr.filter(i=>!q||i.n.toLowerCase().includes(q)||(i.c&&i.c.toString().toLowerCase().includes(q)));
+  const cl={bo:'#378ADD',el:'#1D9E75',bd:'#BA7517',gb:'#E24B4A'}[activeTab];
+  const isAuto=libMode==='auto'&&activeTab==='bo';
+  document.getElementById('libCount').textContent=isAuto?`🔗 Sleep een beheerobject → volledige hiërarchie`:`${items.length} van ${arr.length} items`;
+  const list=document.getElementById('libList');
+  if(!items.length){list.innerHTML='<div style="text-align:center;padding:20px;font-size:11px;color:var(--tx3)">Geen resultaten</div>';return;}
+  list.innerHTML=items.map(i=>`
+    <div class="lib-item" draggable="true" data-type="${activeTab}" data-name="${esc(i.n)}" title="${esc(i.n)}${isAuto?' → volledige decompositie automatisch':''}">
       <span class="lib-dot" style="background:${cl}"></span>
       <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.n)}</span>
-      ${isAuto ? '<span class="auto-badge">auto</span>' : ''}
+      ${isAuto?'<span class="auto-badge">auto</span>':''}
       <span class="lib-code">${esc(i.c)}</span>
     </div>`).join('');
-
-  list.querySelectorAll('.lib-item').forEach(el => {
-    el.addEventListener('dragstart', e => {
-      dragLib = { type: e.currentTarget.dataset.type, name: e.currentTarget.dataset.name, auto: isAuto };
-      dragNid = null;
-      e.dataTransfer.effectAllowed = 'copy';
-      setTimeout(() => e.currentTarget.classList.add('dragging'), 0);
+  list.querySelectorAll('.lib-item').forEach(el=>{
+    el.addEventListener('dragstart',e=>{
+      dragLib={type:e.currentTarget.dataset.type,name:e.currentTarget.dataset.name,auto:isAuto};
+      dragNid=null;
+      e.dataTransfer.effectAllowed='copy';
+      e.dataTransfer.setData('text/plain',JSON.stringify(dragLib));
+      setTimeout(()=>e.currentTarget.classList.add('dragging'),0);
     });
-    el.addEventListener('dragend', e => {
-      e.currentTarget.classList.remove('dragging');
-      dragLib = null;
-    });
-    el.addEventListener('dblclick', e => quickInsert(activeTab, e.currentTarget.dataset.name, isAuto));
+    el.addEventListener('dragend',e=>{e.currentTarget.classList.remove('dragging');dragLib=null});
+    el.addEventListener('dblclick',e=>quickInsert(activeTab,e.currentTarget.dataset.name,isAuto));
   });
 }
 
-function quickInsert(type, name, auto = false) {
-  if (!tree.length) { toast('Maak eerst een Areaal Portefeuille aan'); return; }
-  if (auto && type === 'bo') {
-    const cplx = findFirstOfType('complex');
-    if (!cplx) { toast('Voeg eerst een Complex toe aan het Areaal'); return; }
-    const node = buildBoTree(name);
-    if (node) { addKid(cplx, node); coll[cplx.id] = false; renderTree(); toast('✓ ' + name + ' + volledige hiërarchie toegevoegd'); }
+function quickInsert(type,name,auto=false){
+  if(!tree.length){toast('Maak eerst een Areaal Portefeuille aan');return}
+  if(auto&&type==='bo'){
+    const cplx=findFirstOfType('complex');
+    if(!cplx){toast('Voeg eerst een Complex toe aan het Areaal');return}
+    const node=buildBoTree(name);
+    if(node){addKid(cplx,node);coll[cplx.id]=false;renderTree();autoSave();toast('✓ '+name+' + volledige hiërarchie toegevoegd');}
     return;
   }
-  const PARENT = { complex:'portfolio', bo:'complex', eg:'bo', el:'eg', sy:'el', bd:'sy', gb:'bd' };
-  const par = findFirstOfType(PARENT[type]);
-  if (!par) { toast('Geen ' + TLBL[PARENT[type]] + ' gevonden. Voeg er eerst één toe.'); return; }
-  addKid(par, { id: mkId(), type, label: name, code: libCode(type, name), children: [] });
-  coll[par.id] = false;
-  renderTree();
-  toast(name + ' toegevoegd aan ' + par.label);
+  const PARENT={complex:'portfolio',bo:'complex',eg:'bo',el:'eg',sy:'el',bd:'sy',gb:'bd'};
+  const par=findFirstOfType(PARENT[type]);
+  if(!par){toast('Geen '+TLBL[PARENT[type]]+' gevonden');return}
+  addKid(par,{id:mkId(),type,label:name,code:libCode(type,name),children:[]});
+  coll[par.id]=false;renderTree();autoSave();toast(name+' toegevoegd');
 }
 
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  TREE RENDER
-// ════════════════════════════════════════════════════════
-function renderTree() {
-  const root = document.getElementById('treeRoot');
-  if (!tree.length) {
-    root.innerHTML = `<div class="empty">
+// ════════════════════════════════════════
+function renderTree(){
+  const root=document.getElementById('treeRoot');
+  if(!tree.length){
+    root.innerHTML=`<div class="empty">
       <div style="font-size:48px;opacity:.2">🏗</div>
       <div style="font-size:13px;font-weight:500">Nog geen decompositie</div>
       <div style="font-size:12px;color:var(--tx3);max-width:280px">
@@ -373,213 +282,147 @@ function renderTree() {
     </div>`;
     return;
   }
-  root.innerHTML = tree.map(n => renderNode(n, 0)).join('');
+  root.innerHTML=tree.map(n=>renderNode(n,0)).join('');
   attachEvents();
 }
 
-function renderNode(node, depth) {
-  const hasKids = node.children && node.children.length > 0;
-  const isCollapsed = coll[node.id];
-  const col = TCOL[node.type] || '#888';
-  const pipes = Array.from({length: depth}, () => '<div class="ip"></div>').join('');
-  const mBadge = node.meenemen && node.meenemen !== 'ja'
-    ? `<span class="mbadge ${node.meenemen === 'optioneel' ? 'opt' : 'nee'}">${esc(node.meenemen)}</span>` : '';
-  const canHaveKids = (KIDS[node.type] || []).length > 0;
-
+function renderNode(node,depth){
+  const hasKids=node.children&&node.children.length>0;
+  const isCollapsed=coll[node.id];
+  const col=TCOL[node.type]||'#888';
+  const pipes=Array.from({length:depth},()=>'<div class="ip"></div>').join('');
+  const mBadge=node.meenemen&&node.meenemen!=='ja'?`<span class="mbadge opt">${esc(node.meenemen)}</span>`:'';
+  const canKids=(KIDS[node.type]||[]).length>0;
   return `<div class="node-block" id="blk-${node.id}" data-id="${node.id}" data-type="${node.type}">
-    <div class="node-row">
-      <div class="node-indent">${pipes}</div>
-      <div class="node-body ${selId === node.id ? 'sel' : ''}" id="nb-${node.id}" data-id="${node.id}" data-type="${node.type}">
-        ${hasKids
-          ? `<span class="ntog" data-tog="${node.id}">${isCollapsed ? '+' : '−'}</span>`
-          : `<span style="width:16px;flex-shrink:0"></span>`}
-        <span class="nico" style="background:${col}"></span>
-        <span class="nlab" title="${esc(node.label)}">${esc(node.label)}</span>
-        ${node.code ? `<span class="ncod">${esc(node.code)}</span>` : ''}
-        ${mBadge}
-        ${hasKids ? `<span class="ncnt">${node.children.length}</span>` : ''}
-        <span class="nact">
-          ${canHaveKids ? `<button class="na" data-act="add" data-id="${node.id}" title="Kind toevoegen">＋</button>` : ''}
-          <button class="na" data-act="up"  data-id="${node.id}" title="Omhoog">↑</button>
-          <button class="na" data-act="dn"  data-id="${node.id}" title="Omlaag">↓</button>
-          <button class="na" data-act="ren" data-id="${node.id}" title="Naam wijzigen">✎</button>
-          <button class="na" data-act="del" data-id="${node.id}" title="Verwijderen">✕</button>
-        </span>
-      </div>
-    </div>
-    ${hasKids && !isCollapsed
-      ? `<div class="node-children">${node.children.map(c => renderNode(c, depth + 1)).join('')}</div>`
-      : ''}
+    <div class="node-row"><div class="node-indent">${pipes}</div>
+    <div class="node-body ${selId===node.id?'sel':''}" id="nb-${node.id}" data-id="${node.id}" data-type="${node.type}">
+      ${hasKids?`<span class="ntog" data-tog="${node.id}">${isCollapsed?'+':'−'}</span>`:`<span style="width:16px;flex-shrink:0"></span>`}
+      <span class="nico" style="background:${col}"></span>
+      <span class="nlab" title="${esc(node.label)}">${esc(node.label)}</span>
+      ${node.code?`<span class="ncod">${esc(node.code)}</span>`:''}
+      ${mBadge}
+      ${hasKids?`<span class="ncnt">${node.children.length}</span>`:''}
+      <span class="nact">
+        ${canKids?`<button class="na" data-act="add" data-id="${node.id}" title="Kind toevoegen">＋</button>`:''}
+        <button class="na" data-act="up"  data-id="${node.id}" title="Omhoog">↑</button>
+        <button class="na" data-act="dn"  data-id="${node.id}" title="Omlaag">↓</button>
+        <button class="na" data-act="ren" data-id="${node.id}" title="Naam wijzigen">✎</button>
+        <button class="na" data-act="del" data-id="${node.id}" title="Verwijderen">✕</button>
+      </span>
+    </div></div>
+    ${hasKids&&!isCollapsed?`<div class="node-children">${node.children.map(c=>renderNode(c,depth+1)).join('')}</div>`:''}
   </div>`;
 }
 
-function attachEvents() {
-  // Toggle collapse
-  document.querySelectorAll('[data-tog]').forEach(el =>
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      const id = el.dataset.tog;
-      coll[id] = !coll[id];
-      renderTree();
-    })
-  );
-  // Select node → detail
-  document.querySelectorAll('.node-body').forEach(el =>
-    el.addEventListener('click', e => {
-      if (e.target.closest('[data-act]') || e.target.closest('[data-tog]')) return;
-      showDetail(el.dataset.id);
-    })
-  );
-  // Action buttons
-  document.querySelectorAll('[data-act]').forEach(el =>
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      const { id, act } = el.dataset;
-      if (act === 'add') openAddChildModal(id);
-      if (act === 'ren') openRenameModal(id);
-      if (act === 'del') deleteNode(id);
-      if (act === 'up')  moveNode(id, -1);
-      if (act === 'dn')  moveNode(id,  1);
-    })
-  );
+function attachEvents(){
+  document.querySelectorAll('[data-tog]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.tog;coll[id]=!coll[id];renderTree()}));
+  document.querySelectorAll('.node-body').forEach(el=>{
+    el.addEventListener('click',e=>{if(e.target.closest('[data-act]')||e.target.closest('[data-tog]'))return;showDetail(el.dataset.id)});
+  });
+  document.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',e=>{
+    e.stopPropagation();const{id,act}=el.dataset;
+    if(act==='add')openAddChildModal(id);
+    if(act==='ren')openRenameModal(id);
+    if(act==='del')deleteNode(id);
+    if(act==='up')moveNode(id,-1);
+    if(act==='dn')moveNode(id,1);
+  }));
   // Drag tree nodes
-  document.querySelectorAll('.node-body').forEach(el => {
-    el.setAttribute('draggable', 'true');
-    el.addEventListener('dragstart', e => {
-      dragNid = el.dataset.id;
-      dragLib = null;
-      e.dataTransfer.effectAllowed = 'move';
-      setTimeout(() => el.classList.add('dragging'), 0);
-    });
-    el.addEventListener('dragend', () => {
-      document.querySelectorAll('.node-body.dragging,.node-body.dov,.node-body.dinv')
-        .forEach(x => x.classList.remove('dragging','dov','dinv'));
-      dragNid = null;
-    });
-    el.addEventListener('dragover', e => {
-      e.preventDefault(); e.stopPropagation();
-      document.querySelectorAll('.node-body.dov,.node-body.dinv')
-        .forEach(x => x.classList.remove('dov','dinv'));
-      const tt = el.dataset.type;
-      if (dragLib) {
-        const ok = (dragLib.auto && dragLib.type === 'bo' && tt === 'complex')
-          || (KIDS[tt] || []).includes(dragLib.type);
-        el.classList.add(ok ? 'dov' : 'dinv');
-      } else if (dragNid && dragNid !== el.dataset.id) {
-        const n = findN(dragNid);
-        el.classList.add((KIDS[tt]||[]).includes(n?.type) ? 'dov' : 'dinv');
+  document.querySelectorAll('.node-body').forEach(el=>{
+    el.setAttribute('draggable','true');
+    el.addEventListener('dragstart',e=>{dragNid=el.dataset.id;dragLib=null;e.dataTransfer.effectAllowed='move';setTimeout(()=>el.classList.add('dragging'),0)});
+    el.addEventListener('dragend',()=>{document.querySelectorAll('.node-body.dragging,.node-body.dov,.node-body.dinv').forEach(x=>x.classList.remove('dragging','dov','dinv'));dragNid=null});
+    el.addEventListener('dragover',e=>{
+      e.preventDefault();e.stopPropagation();
+      document.querySelectorAll('.node-body.dov,.node-body.dinv').forEach(x=>x.classList.remove('dov','dinv'));
+      const tt=el.dataset.type;
+      if(dragLib){
+        const ok=(dragLib.auto&&dragLib.type==='bo'&&tt==='complex')||(!dragLib.auto&&(KIDS[tt]||[]).includes(dragLib.type));
+        el.classList.add(ok?'dov':'dinv');
+      } else if(dragNid&&dragNid!==el.dataset.id){
+        const n=findN(dragNid);
+        el.classList.add((KIDS[tt]||[]).includes(n?.type)?'dov':'dinv');
       }
     });
-    el.addEventListener('dragleave', e => {
-      if (!el.contains(e.relatedTarget)) el.classList.remove('dov','dinv');
-    });
-    el.addEventListener('drop', e => {
-      e.preventDefault(); e.stopPropagation();
+    el.addEventListener('dragleave',e=>{if(!el.contains(e.relatedTarget))el.classList.remove('dov','dinv')});
+    el.addEventListener('drop',e=>{
+      e.preventDefault();e.stopPropagation();
       el.classList.remove('dov','dinv');
-      const tnode = findN(el.dataset.id);
-      if (!tnode) return;
-      if (dragLib) {
-        const { type, name, auto } = dragLib;
-        if (auto && type === 'bo' && tnode.type === 'complex') {
-          const node = buildBoTree(name);
-          if (node) { addKid(tnode, node); coll[tnode.id] = false; renderTree(); toast('✓ ' + name + ' + volledige decompositie toegevoegd'); }
-        } else if ((KIDS[tnode.type]||[]).includes(type)) {
-          addKid(tnode, { id: mkId(), type, label: name, code: libCode(type, name), children: [] });
-          coll[tnode.id] = false; renderTree(); toast(name + ' toegevoegd');
+      const tnode=findN(el.dataset.id);if(!tnode)return;
+      if(dragLib){
+        const{type,name,auto}=dragLib;
+        if(auto&&type==='bo'&&tnode.type==='complex'){
+          const node=buildBoTree(name);
+          if(node){addKid(tnode,node);coll[tnode.id]=false;renderTree();autoSave();toast('✓ '+name+' + volledige decompositie toegevoegd');}
+        } else if(!auto&&(KIDS[tnode.type]||[]).includes(type)){
+          addKid(tnode,{id:mkId(),type,label:name,code:libCode(type,name),children:[]});
+          coll[tnode.id]=false;renderTree();autoSave();toast(name+' toegevoegd');
         } else {
-          toast('⚠ ' + TLBL[type] + ' past niet onder ' + TLBL[tnode.type]);
+          toast('⚠ '+TLBL[type]+' past niet onder '+TLBL[tnode.type]);
         }
-      } else if (dragNid && dragNid !== tnode.id) {
-        const n = findN(dragNid);
-        if (!n || !(KIDS[tnode.type]||[]).includes(n.type)) { toast('⚠ Kan hier niet plaatsen'); return; }
-        const op = findP(dragNid);
-        if (op) op.children = op.children.filter(c => c.id !== dragNid);
-        else tree = tree.filter(x => x.id !== dragNid);
-        addKid(tnode, n); coll[tnode.id] = false; renderTree(); toast(n.label + ' verplaatst');
+      } else if(dragNid&&dragNid!==tnode.id){
+        const n=findN(dragNid);if(!n)return;
+        if(!(KIDS[tnode.type]||[]).includes(n.type)){toast('⚠ Kan hier niet plaatsen');return}
+        const op=findP(dragNid);
+        if(op)op.children=op.children.filter(c=>c.id!==dragNid);else tree=tree.filter(x=>x.id!==dragNid);
+        addKid(tnode,n);coll[tnode.id]=false;renderTree();autoSave();toast(n.label+' verplaatst');
       }
     });
   });
 }
 
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  TREE ACTIONS
-// ════════════════════════════════════════════════════════
-function moveNode(id, dir) {
-  const par = findP(id);
-  const list = par ? par.children : tree;
-  const idx = list.findIndex(n => n.id === id);
-  if (idx === -1) return;
-  const ni = idx + dir;
-  if (ni < 0 || ni >= list.length) return;
-  [list[idx], list[ni]] = [list[ni], list[idx]];
-  renderTree();
+// ════════════════════════════════════════
+function moveNode(id,dir){
+  const par=findP(id);const list=par?par.children:tree;
+  const idx=list.findIndex(n=>n.id===id);if(idx===-1)return;
+  const ni=idx+dir;if(ni<0||ni>=list.length)return;
+  [list[idx],list[ni]]=[list[ni],list[idx]];renderTree();autoSave();
 }
-function expandAll()  { function w(ns){ns.forEach(n=>{coll[n.id]=false;if(n.children)w(n.children)})} w(tree); renderTree(); }
-function collapseAll(){ function w(ns){ns.forEach(n=>{if(n.children?.length)coll[n.id]=true;if(n.children)w(n.children)})} w(tree); renderTree(); }
-function deleteNode(id) {
-  if (!confirm('Verwijder dit item en alle onderliggende items?')) return;
-  const p = findP(id);
-  if (p) p.children = p.children.filter(c => c.id !== id);
-  else tree = tree.filter(n => n.id !== id);
-  if (selId === id) closeDetail();
-  renderTree();
+function expandAll(){function w(ns){ns.forEach(n=>{coll[n.id]=false;if(n.children)w(n.children)})}w(tree);renderTree()}
+function collapseAll(){function w(ns){ns.forEach(n=>{if(n.children?.length)coll[n.id]=true;if(n.children)w(n.children)})}w(tree);renderTree()}
+function deleteNode(id){
+  if(!confirm('Verwijder dit item en alle onderliggende items?'))return;
+  const p=findP(id);
+  if(p)p.children=p.children.filter(c=>c.id!==id);else tree=tree.filter(n=>n.id!==id);
+  if(selId===id)closeDetail();renderTree();autoSave();
 }
 
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  DETAIL PANEL
-// ════════════════════════════════════════════════════════
-function showDetail(id) {
-  const node = findN(id);
-  if (!node) return;
-  selId = id;
+// ════════════════════════════════════════
+function showDetail(id){
+  const node=findN(id);if(!node)return;
+  selId=id;
   document.getElementById('detailPanel').classList.add('open');
-  document.getElementById('dpTitle').textContent = TLBL[node.type] || node.type;
-  const col = TCOL[node.type] || '#888';
+  document.getElementById('dpTitle').textContent=TLBL[node.type]||node.type;
+  const col=TCOL[node.type]||'#888';
+  let libInfo='';
+  if(node.type==='bo'){const b=BO.find(x=>x.n===node.label);if(b?.d)libInfo+=`<div class="dpf"><div class="dpl">Definitie</div><div class="dpv">${esc(b.d)}</div></div>`;}
+  else if(node.type==='el'){const e=EL.find(x=>x.n===node.label);if(e?.g)libInfo+=`<div class="dpf"><div class="dpl">Elementengroep</div><div class="dpv">${esc(e.g)}</div></div>`;if(e?.f)libInfo+=`<div class="dpf"><div class="dpl">Functie</div><div class="dpv">${esc(e.f)}</div></div>`;}
+  else if(node.type==='bd'){const b=BD.find(x=>x.n===node.label);if(b?.d)libInfo+=`<div class="dpf"><div class="dpl">Definitie</div><div class="dpv">${esc(b.d)}</div></div>`;}
+  else if(node.type==='gb'){if(node.gebrekgroep)libInfo+=`<div class="dpf"><div class="dpl">Gebrekgroep</div><div class="dpv">${esc(node.gebrekgroep)}</div></div>`;const g=GB.find(x=>x.n===node.label);if(g?.t)libInfo+=`<div class="dpf"><div class="dpl">Type</div><div class="dpv">${esc(g.t)}</div></div>`;if(g?.e)libInfo+=`<div class="dpf"><div class="dpl">Ernst</div><div class="dpv">${esc(g.e)}</div></div>`;}
+  if(node.meenemen&&node.meenemen!=='ja')libInfo+=`<div class="dpf"><div class="dpl">Meenemen</div><div class="dpv">${esc(node.meenemen)}</div></div>`;
+  const canKids=(KIDS[node.type]||[]).length>0;
 
-  // Extra info from library
-  let libInfo = '';
-  if (node.type === 'bo') {
-    const b = BO.find(x => x.n === node.label);
-    if (b?.d) libInfo += `<div class="dpf"><div class="dpl">Definitie</div><div class="dpv">${esc(b.d)}</div></div>`;
-  } else if (node.type === 'el') {
-    const e = EL.find(x => x.n === node.label);
-    if (e?.g) libInfo += `<div class="dpf"><div class="dpl">Elementengroep</div><div class="dpv">${esc(e.g)}</div></div>`;
-    if (e?.f) libInfo += `<div class="dpf"><div class="dpl">Functie</div><div class="dpv">${esc(e.f)}</div></div>`;
-    if (e?.r) libInfo += `<div class="dpf"><div class="dpl">Vakdiscipline</div><div class="dpv">${esc(e.r)}</div></div>`;
-  } else if (node.type === 'bd') {
-    const b = BD.find(x => x.n === node.label);
-    if (b?.d) libInfo += `<div class="dpf"><div class="dpl">Definitie</div><div class="dpv">${esc(b.d)}</div></div>`;
-  } else if (node.type === 'gb') {
-    if (node.gebrekgroep) libInfo += `<div class="dpf"><div class="dpl">Gebrekgroep</div><div class="dpv">${esc(node.gebrekgroep)}</div></div>`;
-    if (node.gebreksoort) libInfo += `<div class="dpf"><div class="dpl">Gebreksoort</div><div class="dpv">${esc(node.gebreksoort)}</div></div>`;
-    const g = GB.find(x => x.n === node.label);
-    if (g?.t) libInfo += `<div class="dpf"><div class="dpl">Type</div><div class="dpv">${esc(g.t)}</div></div>`;
-    if (g?.s) libInfo += `<div class="dpf"><div class="dpl">Soort</div><div class="dpv">${esc(g.s)}</div></div>`;
-    if (g?.e) libInfo += `<div class="dpf"><div class="dpl">Ernst</div><div class="dpv">${esc(g.e)}</div></div>`;
-    if (g?.g) libInfo += `<div class="dpf"><div class="dpl">Gebrekgroep (NEN)</div><div class="dpv">${esc(g.g)}</div></div>`;
-  }
-  if (node.meenemen && node.meenemen !== 'ja') {
-    libInfo += `<div class="dpf"><div class="dpl">Meenemen</div><div class="dpv">${esc(node.meenemen)}</div></div>`;
-  }
+  // Fase 2 knop alleen voor BO nodes
+  const fase2Block = node.type==='bo' ? `
+    <div class="dpf" style="background:var(--green-l);border-radius:6px;padding:8px 10px;border:none">
+      <div class="dpl" style="color:var(--green)">Fase 2 — Conditiemeting</div>
+      <div class="dpv" style="color:var(--green);font-size:11px;margin-bottom:8px">Voer een NEN 2767 conditiemeting uit voor dit beheerobject</div>
+      <button class="btn gr" style="width:100%;justify-content:center;font-size:12px" onclick="startInspectie('${id}')">📋 Inspectie starten</button>
+    </div>` : '';
 
-  const canHaveKids = (KIDS[node.type] || []).length > 0;
-
-  document.getElementById('dpBody').innerHTML = `
+  document.getElementById('dpBody').innerHTML=`
     <div class="dpf"><div class="dpl">Naam</div><div class="dpv" style="font-weight:500">${esc(node.label)}</div></div>
-    <div class="dpf"><div class="dpl">Type</div><div class="dpv">
-      <span class="tbadge" style="background:${col}22;color:${col}">
-        <span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block"></span>
-        ${TLBL[node.type] || node.type}
-      </span>
-    </div></div>
-    ${node.code ? `<div class="dpf"><div class="dpl">NEN 2767 Code</div><div class="dpv" style="font-family:monospace">${esc(node.code)}</div></div>` : ''}
+    <div class="dpf"><div class="dpl">Type</div><div class="dpv"><span class="tbadge" style="background:${col}22;color:${col}"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block"></span>${TLBL[node.type]||node.type}</span></div></div>
+    ${node.code?`<div class="dpf"><div class="dpl">NEN 2767 Code</div><div class="dpv" style="font-family:monospace">${esc(node.code)}</div></div>`:''}
     ${libInfo}
     <div class="dpf"><div class="dpl">Onderliggende items</div><div class="dpv">${countD(node)}</div></div>
-    <div class="dpf"><div class="dpl">Fase</div><div class="dpv" style="color:var(--tx3)">Fase 1 — Decompositie bibliotheek</div></div>
-    ${node.type === 'bo' ? `<div class="dpf" style="background:var(--green-l,#e1f5ee);border-radius:6px;padding:8px 10px;border:none"><div class="dpl" style="color:#0F6E56">Fase 2 beschikbaar</div><div class="dpv" style="color:#0F6E56;font-size:11px">Klik "Inspectie starten" om een NEN 2767 conditiemeting uit te voeren voor dit beheerobject</div></div>` : ''}
+    ${fase2Block}
     <div class="dp-acts">
-      ${node.type === 'bo' ? `<button class="btn" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:500" onclick="startInspectie('${id}')">📋 Inspectie starten</button>` : ''}
-      ${canHaveKids ? `<button class="btn" onclick="openAddChildModal('${id}')">＋ Kind toevoegen</button>` : ''}
+      ${canKids?`<button class="btn" onclick="openAddChildModal('${id}')">＋ Kind toevoegen</button>`:''}
       <button class="btn" onclick="openRenameModal('${id}')">✎ Naam wijzigen</button>
       <button class="btn" onclick="moveNode('${id}',-1)">↑ Omhoog</button>
       <button class="btn" onclick="moveNode('${id}',1)">↓ Omlaag</button>
@@ -587,158 +430,125 @@ function showDetail(id) {
     </div>`;
   renderTree();
 }
-function closeDetail() {
-  selId = null;
-  document.getElementById('detailPanel').classList.remove('open');
-  renderTree();
+function closeDetail(){selId=null;document.getElementById('detailPanel').classList.remove('open');renderTree()}
+
+// ════════════════════════════════════════
+//  FASE 2 — Inspectie starten
+//  Sla eerst decompositie op in localStorage
+//  zodat terugnavigeren niets verliest
+// ════════════════════════════════════════
+function startInspectie(id){
+  const node=findN(id);if(!node)return;
+  autoSave(); // Bewaar huidige staat EERST
+  const boName=encodeURIComponent(node.label);
+  window.location.href='inspectie.html?bo='+boName;
 }
 
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  MODALS
-// ════════════════════════════════════════════════════════
-function openAddModal(type, parentId) {
-  document.getElementById('mbox').innerHTML = `
-    <h3>Nieuw ${TLBL[type] || type}</h3>
-    <div class="fr"><label>Naam *</label>
-      <input id="mN" type="text" placeholder="${
-        type==='portfolio' ? 'bijv. Waterschap AGV' :
-        type==='complex'   ? 'bijv. Polder Groot-Mijdrecht' : 'Naam'
-      }">
-    </div>
+// ════════════════════════════════════════
+function openAddModal(type,parentId){
+  document.getElementById('mbox').innerHTML=`
+    <h3>Nieuw ${TLBL[type]||type}</h3>
+    <div class="fr"><label>Naam *</label><input id="mN" type="text" placeholder="${type==='portfolio'?'bijv. Waterschap AGV':type==='complex'?'bijv. Polder Groot-Mijdrecht':'Naam'}"></div>
     <div class="fr"><label>Code (optioneel)</label><input id="mC" type="text" placeholder="bijv. P01"></div>
-    <div class="mbtns">
-      <button class="btn" onclick="closeModal()">Annuleren</button>
-      <button class="btn pr" onclick="doAdd('${type}','${parentId||''}')">Toevoegen</button>
-    </div>`;
-  document.getElementById('moverlay').style.display = 'flex';
-  setTimeout(() => document.getElementById('mN')?.focus(), 50);
+    <div class="mbtns"><button class="btn" onclick="closeModal()">Annuleren</button><button class="btn pr" onclick="doAdd('${type}','${parentId||''}')">Toevoegen</button></div>`;
+  document.getElementById('moverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('mN')?.focus(),50);
 }
-function openAddChildModal(pid) {
-  const p = findN(pid);
-  if (!p) return;
-  const ct = KIDS[p.type];
-  if (!ct || !ct.length) { toast('Geen kinderen mogelijk voor dit type'); return; }
-  openAddModal(ct[0], pid);
+function openAddChildModal(pid){
+  const p=findN(pid);if(!p)return;
+  const ct=KIDS[p.type];if(!ct||!ct.length){toast('Geen kinderen mogelijk voor dit type');return}
+  openAddModal(ct[0],pid);
 }
-function openRenameModal(id) {
-  const n = findN(id);
-  if (!n) return;
-  document.getElementById('mbox').innerHTML = `
+function openRenameModal(id){
+  const n=findN(id);if(!n)return;
+  document.getElementById('mbox').innerHTML=`
     <h3>Naam wijzigen</h3>
     <div class="fr"><label>Naam</label><input id="rN" type="text" value="${esc(n.label)}"></div>
     <div class="fr"><label>Code</label><input id="rC" type="text" value="${esc(n.code||'')}"></div>
-    <div class="mbtns">
-      <button class="btn" onclick="closeModal()">Annuleren</button>
-      <button class="btn pr" onclick="doRename('${id}')">Opslaan</button>
-    </div>`;
-  document.getElementById('moverlay').style.display = 'flex';
-  setTimeout(() => document.getElementById('rN')?.focus(), 50);
+    <div class="mbtns"><button class="btn" onclick="closeModal()">Annuleren</button><button class="btn pr" onclick="doRename('${id}')">Opslaan</button></div>`;
+  document.getElementById('moverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('rN')?.focus(),50);
 }
-function doAdd(type, pid) {
-  const name = document.getElementById('mN')?.value?.trim();
-  if (!name) { toast('Vul een naam in'); return; }
-  const code = document.getElementById('mC')?.value?.trim() || '';
-  const node = { id: mkId(), type, label: name, code, children: [] };
-  if (pid) {
-    const p = findN(pid);
-    if (p) { addKid(p, node); coll[pid] = false; }
-  } else {
-    tree.push(node);
-  }
-  closeModal(); renderTree(); toast(name + ' toegevoegd');
+function doAdd(type,pid){
+  const name=document.getElementById('mN')?.value?.trim();if(!name){toast('Vul een naam in');return}
+  const code=document.getElementById('mC')?.value?.trim()||'';
+  const node={id:mkId(),type,label:name,code,children:[]};
+  if(pid){const p=findN(pid);if(p){addKid(p,node);coll[pid]=false}}else tree.push(node);
+  closeModal();renderTree();autoSave();toast(name+' toegevoegd');
 }
-function doRename(id) {
-  const n = findN(id);
-  if (!n) return;
-  const name = document.getElementById('rN')?.value?.trim();
-  if (name) n.label = name;
-  n.code = document.getElementById('rC')?.value?.trim() || n.code;
-  closeModal();
-  if (selId === id) showDetail(id); else renderTree();
+function doRename(id){
+  const n=findN(id);if(!n)return;
+  const name=document.getElementById('rN')?.value?.trim();if(name)n.label=name;
+  n.code=document.getElementById('rC')?.value?.trim()||n.code;
+  closeModal();if(selId===id)showDetail(id);else renderTree();autoSave();
 }
-function closeModal() { document.getElementById('moverlay').style.display = 'none'; }
+function closeModal(){document.getElementById('moverlay').style.display='none'}
 
-// ════════════════════════════════════════════════════════
-//  EXPORT / IMPORT
-// ════════════════════════════════════════════════════════
-function exportJSON() {
-  const data = JSON.stringify({
-    version: '2.0', fase: 'Fase-1-Decompositie',
-    created: new Date().toISOString(), tree
-  }, null, 2);
-  dl('NEN2767_decompositie.json', data, 'application/json');
-  toast('JSON geëxporteerd');
+// ════════════════════════════════════════
+//  OPSLAAN / LADEN (bestand op laptop)
+// ════════════════════════════════════════
+function saveToFile(){
+  const data=JSON.stringify({version:'2.0',savedAt:new Date().toISOString(),tree,idC},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='NEN2767_Decompositie_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();URL.revokeObjectURL(url);
+  toast('Decompositie opgeslagen als JSON-bestand ✓');
 }
-function exportCSV() {
-  const rows = [['Niveau','Type','Naam','Code','Meenemen','Gebrekgroep','Pad']];
-  function walk(n, path, lvl) {
-    const p = path ? path + ' > ' + n.label : n.label;
-    rows.push([lvl, TLBL[n.type]||n.type, n.label, n.code||'', n.meenemen||'', n.gebrekgroep||'', path||'(root)']);
-    (n.children||[]).forEach(c => walk(c, p, lvl + 1));
-  }
-  tree.forEach(n => walk(n, '', 0));
-  const csv = rows.map(r => r.map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('\r\n');
-  dl('NEN2767_decompositie.csv', '\uFEFF' + csv, 'text/csv;charset=utf-8');
-  toast('Excel/CSV geëxporteerd');
-}
-function importJSON() {
-  const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = '.json';
-  inp.onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (data.tree) { tree = data.tree; renderTree(); toast('Import geslaagd!'); }
-        else toast('Ongeldig bestandsformaat');
-      } catch (err) { toast('Fout bij importeren: ' + err.message); }
-    };
-    r.readAsText(f);
+
+function loadFromFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(data.tree){tree=data.tree;idC=data.idC||1;renderTree();autoSave();toast('Decompositie geladen: '+file.name);}
+      else toast('Ongeldig bestandsformaat');
+    }catch(e){toast('Fout bij laden: '+e.message);}
   };
-  inp.click();
-}
-function dl(name, content, type) {
-  const b = new Blob([content], { type });
-  const u = URL.createObjectURL(b);
-  const a = document.createElement('a');
-  a.href = u; a.download = name; a.click();
-  URL.revokeObjectURL(u);
-}
-function toast(msg, ms = 3000) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), ms);
+  reader.readAsText(file);
+  input.value='';
 }
 
-// ════════════════════════════════════════════════════════
-//  FASE 2 — Inspectie starten
-// ════════════════════════════════════════════════════════
-function startInspectie(id) {
-  const node = findN(id);
-  if (!node) return;
-  const boName = encodeURIComponent(node.label);
-  window.location.href = 'inspectie.html?bo=' + boName;
+function exportCSV(){
+  const rows=[['Niveau','Type','Naam','Code','Meenemen','Pad']];
+  function walk(n,path,lvl){const p=path?path+' > '+n.label:n.label;rows.push([lvl,TLBL[n.type]||n.type,n.label,n.code||'',n.meenemen||'',path||'(root)']);(n.children||[]).forEach(c=>walk(c,p,lvl+1));}
+  tree.forEach(n=>walk(n,'',0));
+  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='NEN2767_Decompositie_'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);
+  toast('Excel/CSV geëxporteerd ✓');
 }
 
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════
 //  INIT
-// ════════════════════════════════════════════════════════
-document.getElementById('libSearch').addEventListener('input', renderLib);
-document.getElementById('canvas').addEventListener('dragover', e => e.preventDefault());
-document.getElementById('canvas').addEventListener('drop', e => {
+// ════════════════════════════════════════
+document.getElementById('libSearch').addEventListener('input',renderLib);
+document.getElementById('canvas').addEventListener('dragover',e=>e.preventDefault());
+document.getElementById('canvas').addEventListener('drop',e=>{
   e.preventDefault();
-  if (dragLib && dragLib.type === 'portfolio') openAddModal('portfolio', null);
+  if(dragLib&&dragLib.type==='portfolio')openAddModal('portfolio',null);
 });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeDetail(); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeDetail();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();saveToFile();}
 });
-window.addEventListener('load', () => {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+
+// Laad eerder opgeslagen decompositie uit localStorage bij opstarten
+window.addEventListener('load',()=>{
+  const restored = autoLoad();
   renderLib();
   renderTree();
+  if(restored) toast('Decompositie hersteld ✓ ('+tree.length+' areaal/en)');
 });
+
+// Bewaar ook bij het verlaten van de pagina
+window.addEventListener('beforeunload',()=>autoSave());
 </script>
 </body>
 </html>
