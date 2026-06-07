@@ -234,6 +234,10 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
     <button class="tbtn" onclick="exportPDF()">📄 PDF</button>
     <button class="tbtn" id="mapToggleBtn" onclick="toggleMapView()">🗺 Kaart</button>
     <button class="tbtn" id="undoBtn" onclick="undo()" title="Ongedaan maken (Ctrl+Z)" disabled>↩ Ongedaan</button>
+    <div class="topbar-sep"></div>
+    <button class="tbtn" onclick="goToFase2()" title="Ga naar Fase 2 — Conditiemeting" style="background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.55);font-weight:700;display:flex;align-items:center;gap:5px">
+      📋 Fase 2 <span style="font-size:9px;opacity:.8;font-weight:400">Conditiemeting →</span>
+    </button>
     <button class="tbtn accent" onclick="clearAll()">🗑 Leegmaken</button>
   </div>
 </div>
@@ -1020,6 +1024,37 @@ function openAddChild(parentId){const par=findN(parentId);if(!par)return;const c
 function addAreaal(){showModal('Nieuw Areaal',`<div class="form-row"><label>Naam</label><input id="areaalInp" placeholder="bijv. Waterschap AGV"></div>`,[{l:'Annuleren',c:'btn',cb:closeModal},{l:'Aanmaken',c:'btn primary',cb:()=>{const v=document.getElementById('areaalInp').value.trim();if(v){pushUndo();tree.push({id:mkId(),type:'areaal',label:v,nenCode:'',wcode:'',notitie:'',children:[]});renderTree();autoSave();toast(v+' aangemaakt');}closeModal();}}]);setTimeout(()=>{const el=document.getElementById('areaalInp');el&&el.focus();},50);}
 function expandAll(){function w(ns){for(const n of ns){coll[n.id]=false;if(n.children)w(n.children);}}w(tree);renderTree();}
 function collapseAll(){function w(ns){for(const n of ns){if(n.children?.length)coll[n.id]=true;if(n.children)w(n.children);}}w(tree);renderTree();}
+
+// ══════════════════════════════════════════════════════════
+//  FASE 2 NAVIGATIE
+// ══════════════════════════════════════════════════════════
+function goToFase2(){
+  autoSave();
+  if(!tree.length){
+    showModal('Naar Fase 2',
+      `<p style="font-size:12px;line-height:1.6">Je hebt nog geen decompositie in Fase 1.<br><br>
+      Je kunt Fase 2 ook zonder Fase 1 gebruiken — je kiest daar handmatig een beheerobject uit de NEN 2767 bibliotheek.</p>`,
+      [{l:'Annuleren',c:'btn',cb:closeModal},
+       {l:'Toch naar Fase 2 →',c:'btn primary',cb:()=>{closeModal();window.open('inspectie.html','_blank');}}]);
+    return;
+  }
+  showModal('Naar Fase 2 — Conditiemeting',
+    `<p style="font-size:12px;line-height:1.6">
+      Je gaat naar <b>Fase 2 — Conditiemeting</b>.<br><br>
+      Sla je decompositie op als JSON en laad deze daarna in Fase 2. 
+      Alle beheerobjecten worden dan automatisch ingeladen in het inspectieformulier.
+    </p>`,
+    [{l:'Annuleren',c:'btn',cb:closeModal},
+     {l:'💾 Opslaan + Fase 2 openen',c:'btn primary',cb:()=>{
+       closeModal();
+       const blob=new Blob([JSON.stringify({version:3,projectName,tree,idC},null,2)],{type:'application/json'});
+       const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+       a.download=(projectName||'decompositie').replace(/[^a-z0-9]/gi,'_')+'.json';a.click();
+       setTimeout(()=>window.open('inspectie.html','_blank'),600);
+       toast('💾 JSON opgeslagen — Fase 2 opent zo…');
+     }},
+     {l:'Fase 2 openen (zonder opslaan)',c:'btn',cb:()=>{closeModal();window.open('inspectie.html','_blank');}}]);
+}
 
 // ══════════════════════════════════════════════════════════
 //  MODAL
