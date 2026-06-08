@@ -1099,7 +1099,7 @@ function _generateReport(){
   const tocFoto=allPhotos.length?tocNum++:null;
 
   const now=new Date().toLocaleDateString('nl-NL',{day:'2-digit',month:'long',year:'numeric'});
-  const w=window.open('''_blank');
+  const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
   <title>Inspectierapport — ${selectedBO}</title>
   <style>
