@@ -159,6 +159,40 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 #ghost{position:fixed;pointer-events:none;z-index:9999;background:var(--acc);color:#fff;padding:5px 12px;border-radius:4px;font-size:12px;font-weight:600;display:none}
+
+/* ── BO ELEMENT LIST (inline in tree) ── */
+.nd-el-list{
+  display:none;flex-direction:column;
+  border-top:1px solid var(--bdr);
+  background:var(--sur);
+  overflow:hidden;
+}
+.nd.open>.nd-el-list{display:flex}
+.nd-el-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 12px 5px 14px;
+  font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--tm);
+  background:var(--s2);
+  border-bottom:1px solid var(--bdr);
+  flex-shrink:0;
+}
+.bo-el-rows{
+  display:flex;flex-direction:column;
+  max-height:220px;overflow-y:auto;
+  padding:4px 0;
+}
+.bo-el-row{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 12px 4px 14px;
+  font-size:12px;
+  font-family:'Segoe UI',system-ui,sans-serif;
+  border-bottom:1px solid transparent;
+  transition:background .1s;
+}
+.bo-el-row:hover{background:var(--asf)}
+.bo-el-row:last-child{border-bottom:none}
+.bo-el-name{color:var(--th);flex:1;font-weight:500;line-height:1.3}
 </style>
 </head>
 <body>
@@ -396,8 +430,17 @@ function loadJSON(){
 // DETAIL PANEL
 // ═══════════════════════════════════════════
 function selectBO(id){
-  if(selectedId===id){ closeDetail(); return; }
-  selectedId=id; render();
+  var n = findNode(id);
+  if(!n) return;
+  if(selectedId===id){
+    // Toggle open/close when clicking same BO again
+    n.open = !n.open;
+    if(!n.open){ closeDetail(); return; }
+  } else {
+    selectedId=id;
+    n.open=true;
+  }
+  render();
   renderDetail(id);
   document.getElementById('detail-panel').classList.remove('closed');
 }
@@ -439,7 +482,7 @@ function renderDetail(id){
     return '<div class="el-row2'+(off?' off':'')+'">'+
       '<input type="checkbox" class="el-check"'+(off?'':' checked')+' data-nid="'+id+'" data-el="'+el.element.replace(/"/g,'&quot;')+'">'+
       '<span class="echip2 '+chip+'">'+lbl+'</span>'+
-      '<div><div class="el-name2">'+el.element+'</div><div class="el-rsn2">'+el.redenering+'</div></div>'+
+      '<div><div class="el-name2">'+el.element+'</div><div class="el-rsn2">'+(REDEN[el.element]||'')+'</div></div>'+
     '</div>';
   }).join('');
 
@@ -660,6 +703,26 @@ function renderNode(n){
     var kidsHtml = n.children.map(function(c){ return renderNode(c); }).join('');
     var strip = '<div class="drop-strip" id="strip-'+n.id+'" data-pid="'+n.id+'">+ Zet hier neer</div>';
     kidsPanel = '<div class="nd-kids" id="kids-'+n.id+'">'+cxForm+kidsHtml+strip+'</div>';
+  } else if(bo && n.open) {
+    // Show active elements inline under BO
+    var activeEls = bo.elementen.filter(function(e){
+      return (n.disabledEls||[]).indexOf(e.element) < 0;
+    });
+    var elRows = activeEls.map(function(e){
+      var chip = e.classificatie==='JA'?'cja':e.classificatie==='OPTIONEEL'?'cop':'cne';
+      var lbl  = e.classificatie==='OPTIONEEL'?'OPT':e.classificatie;
+      return '<div class="bo-el-row">'+
+        '<span class="echip2 '+chip+'">'+lbl+'</span>'+
+        '<span class="bo-el-name">'+e.element+'</span>'+
+      '</div>';
+    }).join('');
+    kidsPanel = '<div class="nd-el-list" id="kids-'+n.id+'">'+
+      '<div class="nd-el-header">'+
+        '<span>'+activeEls.length+' actieve elementen</span>'+
+        '<span style="color:var(--tm);font-size:10px">'+(n.disabledEls||[]).length+' uitgeschakeld</span>'+
+      '</div>'+
+      '<div class="bo-el-rows">'+elRows+'</div>'+
+    '</div>';
   }
 
   return '<div class="nd nd-'+n.type+(n.open?' open':'')+(isSel?' sel':'')+'" id="nd-'+n.id+'">'+hd+renameForm+kidsPanel+'</div>';
