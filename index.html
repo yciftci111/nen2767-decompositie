@@ -1107,7 +1107,7 @@ acts += '<button class="nact del" data-action="askdel" data-id="'+n.id+'">×</bu
     // Show active elements inline under BO
     var activeEls = bo.elementen.filter(function(e){
       return (n.disabledEls||[]).indexOf(e.element) < 0;
-    });
+    }).slice().sort(function(a,b){ return a.element.localeCompare(b.element,'nl'); });
     var elRows = activeEls.map(function(e){
       var chip = e.classificatie==='JA'?'cja':e.classificatie==='OPTIONEEL'?'cop':'cne';
       var lbl  = e.classificatie==='OPTIONEEL'?'OPT':e.classificatie;
@@ -1481,7 +1481,8 @@ function renderElementDetail(boId, elName){
 
   function buildBody(){
     var disabled = getDisabled();   // always fresh from state
-    var filtered = bds.filter(function(b){
+    var bdsSorted = bds.slice().sort(function(a,b){ return a[0].localeCompare(b[0],'nl'); });
+    var filtered = bdsSorted.filter(function(b){
       return curF === 'all' || b[1] === curF;
     });
 
