@@ -228,12 +228,17 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 
 /* ── BOUWDELEN LIST ── */
 .bd-list{display:flex;flex-direction:column;gap:2px;padding:6px 14px 10px;max-height:300px;overflow-y:auto}
-.bd-row{display:flex;align-items:flex-start;gap:7px;padding:5px 8px;border-radius:4px;font-size:11px;transition:background .1s;cursor:pointer}
+.bd-row{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:4px;font-size:11px;transition:background .1s;cursor:pointer}
 .bd-row:hover{background:var(--asf)}
 .bd-row.off{opacity:.4}
 .bd-check{width:14px;height:14px;flex-shrink:0;margin-top:2px;accent-color:var(--acc);cursor:pointer}
-.bd-chip{font-size:9px;font-weight:700;padding:2px 5px;border-radius:10px;flex-shrink:0;white-space:nowrap;margin-top:1px}
-.bd-name{color:var(--th);flex:1;font-weight:500;line-height:1.3}
+.bd-chip{
+  font-size:9px;font-weight:700;padding:2px 0;border-radius:10px;flex-shrink:0;
+  width:32px;text-align:center;white-space:nowrap;margin-top:1px;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.bd-name{color:var(--th);flex:1;font-weight:500;line-height:1.3;min-width:0}
+.bd-name-txt{display:inline-block}
 .bd-rsn{color:var(--tm);font-size:10px;line-height:1.4;margin-top:1px}
 
 /* ── BO ELEMENT ROWS: show bouwdeel count ── */
@@ -518,6 +523,8 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 }
 .bk-btn:hover{border-color:var(--acc);background:var(--asf);color:var(--acc)}
 .bk-btn.bk-off:hover{border-color:var(--ne);background:var(--neb);color:var(--ne)}
+.bk-btn.bk-active{background:var(--acc);border-color:var(--acc);color:#fff}
+.bk-btn.bk-active:hover{background:var(--acc);color:#fff}
 
 .bd-bulk-bar{
   display:flex;align-items:center;gap:6px;
@@ -534,6 +541,49 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
   background:var(--asf);padding:1px 5px;border-radius:8px;
   margin-left:4px;flex-shrink:0;
 }
+
+
+/* ── ELEMENT ROW COMPONENT INDICATOR ── */
+.bo-el-comp-cnt{
+  display:inline-flex;align-items:center;gap:2px;flex-shrink:0;
+  font-size:9px;font-weight:700;color:var(--acc);
+  background:var(--asf);padding:1px 6px;border-radius:8px;
+  white-space:nowrap;
+}
+
+
+/* ── COMPONENTEN OVERZICHT TAB ── */
+.dp-tab-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;border-radius:8px;
+  background:var(--acc);color:#fff;font-size:9px;font-weight:700;
+  margin-left:3px;
+}
+.comp-ov-summary{
+  padding:10px 14px;margin:10px 14px 14px;border-radius:6px;
+  background:var(--asf);border:1px solid var(--acc);
+  font-size:12px;color:var(--th);line-height:1.5;
+}
+.comp-ov-summary strong{color:var(--acc)}
+.comp-ov-group{margin:0 14px 14px}
+.comp-ov-group-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:6px 6px 0 0;
+  background:var(--s2);border:1px solid var(--bdr);border-bottom:none;
+  cursor:pointer;transition:.15s;
+}
+.comp-ov-group-hd:hover{background:var(--asf)}
+.comp-ov-elname{flex:1;font-size:12px;font-weight:700;color:var(--th)}
+.comp-ov-jump{font-size:10px;color:var(--acc);font-weight:600;flex-shrink:0}
+.comp-ov-bd{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:8px 10px;border:1px solid var(--bdr);border-top:none;
+  cursor:pointer;transition:.15s;
+}
+.comp-ov-bd:last-child{border-radius:0 0 6px 6px}
+.comp-ov-bd:hover{background:var(--asf)}
+.comp-ov-bdname{flex-shrink:0;font-size:11px;font-weight:600;color:var(--th);min-width:130px}
+.comp-ov-complist{font-size:11px;color:var(--tm);line-height:1.5}
 
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -625,12 +675,14 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
     <div class="dp-tabs" id="dp-tabs" style="display:none">
       <div class="dp-tab active" data-tab="info">📋 Info</div>
       <div class="dp-tab" data-tab="map">🗺 Kaart</div>
+      <div class="dp-tab" data-tab="comp" id="dp-tab-comp">⚙ Componenten</div>
     </div>
     <div id="map-container"></div>
     <div class="resize-handle-v" id="rh-map" title="Versleep om kaart groter te maken"></div>
     <div class="dp-body" id="dp-body">
       <div class="dp-empty"><p>Klik op een beheerobject<br>om details te tonen</p></div>
     </div>
+    <div class="dp-body" id="dp-comp-body" style="display:none"></div>
   </div>
 </div>
 <div id="ghost"></div>
@@ -1171,10 +1223,20 @@ acts += '<button class="nact del" data-action="askdel" data-id="'+n.id+'">×</bu
       var lbl  = e.classificatie==='OPTIONEEL'?'OPT':e.classificatie;
       var bdCount = BD ? (BD[e.element]||[]).length : 0;
       var disabledBDcount = (n.disabledBDs && n.disabledBDs[e.element]) ? n.disabledBDs[e.element].length : 0;
+      // Count components across all bouwdelen of this element
+      var elCompCount = 0;
+      if(n.components){
+        var elBds = BD ? (BD[e.element]||[]) : [];
+        elBds.forEach(function(b){
+          var ck = e.element + '||' + b[0];
+          if(n.components[ck]) elCompCount += n.components[ck].length;
+        });
+      }
       return '<div class="bo-el-row" data-boid="'+n.id+'" data-el="'+e.element.replace(/"/g,'&quot;')+'"'+
         ' style="cursor:pointer" title="Klik voor details">'+
         '<span class="echip2 '+chip+'">'+lbl+'</span>'+
         '<span class="bo-el-name">'+e.element+'</span>'+
+        (elCompCount > 0 ? '<span class="bo-el-comp-cnt" title="'+elCompCount+' componenten toegevoegd">&#9881; '+elCompCount+'</span>' : '')+
         '<span class="bo-el-bd-cnt">'+
           (bdCount > 0 ? (bdCount - disabledBDcount)+'/'+bdCount+' bd' : '')+
         '</span>'+
@@ -1552,6 +1614,7 @@ function renderElementDetail(boId, elName){
   var elInfo = EG ? (EG[elName] || {}) : {};
   var bds    = BD ? (BD[elName] || []) : [];
   var curF   = 'all';
+  var onlyComp = false; // toggle: alleen bouwdelen met componenten
 
   function getDisabled(){
     var n2 = findNode(boId);
@@ -1561,7 +1624,14 @@ function renderElementDetail(boId, elName){
   function buildBody(){
     var disabled = getDisabled();   // always fresh from state
     var bdsSorted = bds.slice().sort(function(a,b){ return a[0].localeCompare(b[0],'nl'); });
+    var nodeForComp = findNode(boId);
+    function hasComp(bdCode){
+      var ck = elName + '||' + bdCode;
+      return !!(nodeForComp && nodeForComp.components && nodeForComp.components[ck] && nodeForComp.components[ck].length > 0);
+    }
+    var totalCompBds = bdsSorted.filter(function(b){ return hasComp(b[0]); }).length;
     var filtered = bdsSorted.filter(function(b){
+      if(onlyComp && !hasComp(b[0])) return false;
       return curF === 'all' || b[1] === curF;
     });
 
@@ -1588,14 +1658,14 @@ function renderElementDetail(boId, elName){
       var compBadge = compCount > 0
         ? '<span class="bd-has-comp" title="' + compCount + ' componenten">&#9881; ' + compCount + '</span>'
         : '';
-      return '<div class="bd-row' + (isOff ? ' off' : '') + '">' +
+      return '<div class="bd-row' + (isOff ? ' off' : '') + '" data-bdname="' + b[0].replace(/"/g,'&quot;') + '">' +
         '<input type="checkbox" class="bd-check"' + (isOff ? '' : ' checked') +
           ' data-boid="' + boId + '"' +
           ' data-el="'   + elName.replace(/"/g, '&quot;') + '"' +
           ' data-bd="'   + b[0].replace(/"/g,   '&quot;') + '">' +
         '<span class="bd-chip ' + chip + '">' + lbl + '</span>' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="bd-name">' + b[0] + compBadge + '</div>' +
+          '<div class="bd-name"><span class="bd-name-txt">' + b[0] + '</span>' + compBadge + '</div>' +
           '<div class="bd-rsn">'  + b[2] + '</div>' +
         '</div>' +
       '</div>';
@@ -1631,6 +1701,9 @@ function renderElementDetail(boId, elName){
           '<span class="bd-bulk-label">Selectie:</span>'+
           '<button class="bk-btn" id="bd-bulk-all">✓ Alle aan</button>'+
           '<button class="bk-btn bk-off" id="bd-bulk-none">✕ Alle uit</button>'+
+          (totalCompBds > 0
+            ? '<button class="bk-btn'+(onlyComp?' bk-active':'')+'" id="bd-toggle-comp">&#9881; Alleen met componenten ('+totalCompBds+')</button>'
+            : '')+
           '<span class="bd-bulk-count">'+(bds.length-disabled.length)+'/'+bds.length+' actief</span>'+
         '</div>' +
         '<div class="el-fbar2">' + filterTabs + '</div>' +
@@ -1663,6 +1736,12 @@ function renderElementDetail(boId, elName){
       // Filter tab
       var tab = t.closest('[data-ef2]');
       if(tab){ curF = tab.dataset.ef2; buildBody(); return; }
+      // Toggle: alleen bouwdelen met componenten
+      if(t.id === 'bd-toggle-comp'){
+        onlyComp = !onlyComp;
+        buildBody();
+        return;
+      }
       // Bulk: alle bouwdelen aan
       if(t.id === 'bd-bulk-all'){
         var n2 = findNode(boId); if(!n2) return;
@@ -1685,9 +1764,8 @@ function renderElementDetail(boId, elName){
       if(t.classList.contains('bd-check')) return;
       // Bouwdeel row click → show bouwdeel detail (but not when clicking the checkbox)
       var bdRow = t.closest('.bd-row');
-      if(bdRow){
-        var bdName = bdRow.querySelector('.bd-name');
-        if(bdName) renderBouwdeelDetail(boId, elName, bdName.textContent);
+      if(bdRow && bdRow.dataset.bdname){
+        renderBouwdeelDetail(boId, elName, bdRow.dataset.bdname);
       }
     };
     dpBody.addEventListener('click', dpBody._tabHandler);
@@ -1876,15 +1954,127 @@ function renderMapOverlay(types){
 function setupDPTabs(boId){
   var tabs = document.getElementById('dp-tabs');
   if(tabs) tabs.style.display = 'flex';
+
+  // Update component count badge on tab
+  var n = findNode(boId);
+  var bo = n ? BOMAP[n.boCode] : null;
+  var totalComp = 0;
+  if(n && n.components && bo){
+    var disEls = n.disabledEls || [];
+    bo.elementen.forEach(function(el){
+      if(disEls.indexOf(el.element) >= 0) return;
+      var elBds = BD ? (BD[el.element]||[]) : [];
+      elBds.forEach(function(b){
+        var ck = el.element + '||' + b[0];
+        if(n.components[ck]) totalComp += n.components[ck].length;
+      });
+    });
+  }
+  var compTab = document.getElementById('dp-tab-comp');
+  if(compTab) compTab.innerHTML = '⚙ Componenten' + (totalComp > 0 ? ' <span class="dp-tab-badge">'+totalComp+'</span>' : '');
+
   document.querySelectorAll('.dp-tab').forEach(function(tab){
     tab.addEventListener('click',function(){
       document.querySelectorAll('.dp-tab').forEach(function(t){ t.classList.remove('active'); });
       tab.classList.add('active');
       var t = tab.dataset.tab;
-      document.getElementById('dp-body').style.display = t==='info' ? '' : 'none';
+      document.getElementById('dp-body').style.display      = t==='info' ? '' : 'none';
+      document.getElementById('dp-comp-body').style.display  = t==='comp' ? '' : 'none';
       document.getElementById('map-container').classList.toggle('vis', t==='map');
       document.getElementById('rh-map').classList.toggle('vis', t==='map');
-      if(t==='map') initOrUpdateMap(boId);
+      if(t==='map')  initOrUpdateMap(boId);
+      if(t==='comp') renderComponentOverview(boId);
+    });
+  });
+}
+
+// ── COMPONENTEN OVERZICHT (per beheerobject) ─────────────────────
+function renderComponentOverview(boId){
+  var n  = findNode(boId); if(!n) return;
+  var bo = BOMAP[n.boCode]; if(!bo) return;
+  var body = document.getElementById('dp-comp-body');
+  if(!body) return;
+
+  var disEls = n.disabledEls || [];
+  var groups = []; // {elName, classificatie, items:[{bdName, cls, comps:[]}]}
+
+  bo.elementen.forEach(function(el){
+    if(disEls.indexOf(el.element) >= 0) return;
+    var elBds = BD ? (BD[el.element]||[]) : [];
+    var items = [];
+    elBds.forEach(function(b){
+      var ck = el.element + '||' + b[0];
+      var comps = (n.components && n.components[ck]) ? n.components[ck] : [];
+      if(comps.length > 0){
+        items.push({ bdName: b[0], cls: b[1], comps: comps });
+      }
+    });
+    if(items.length > 0){
+      groups.push({ elName: el.element, classificatie: el.classificatie, items: items });
+    }
+  });
+
+  if(groups.length === 0){
+    body.innerHTML =
+      '<div class="dp-empty">' +
+        '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:10px"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>' +
+        '<p>Nog geen componenten toegevoegd<br>voor dit beheerobject.<br><span style="font-size:11px;color:var(--tm)">Open een bouwdeel via een element om componenten toe te voegen.</span></p>' +
+      '</div>';
+    return;
+  }
+
+  var totalItems = groups.reduce(function(s,g){ return s + g.items.length; }, 0);
+  var totalComps = groups.reduce(function(s,g){ return s + g.items.reduce(function(s2,it){return s2+it.comps.length;},0); }, 0);
+
+  var html = '<div class="comp-ov-summary">' +
+    '<strong>' + totalComps + '</strong> componenten op <strong>' + totalItems + '</strong> bouwdelen, verspreid over <strong>' + groups.length + '</strong> elementen' +
+  '</div>';
+
+  groups.forEach(function(g){
+    var cc = g.classificatie==='JA' ? 'var(--ne)' : g.classificatie==='OPTIONEEL' ? 'var(--op)' : 'var(--tm)';
+    var cl = g.classificatie==='OPTIONEEL' ? 'OPT' : g.classificatie==='JA' ? 'JA' : 'N.V.T.';
+    html += '<div class="comp-ov-group">' +
+      '<div class="comp-ov-group-hd" data-jumpto-el="' + g.elName.replace(/"/g,'&quot;') + '">' +
+        '<span class="echip2" style="background:'+cc+';color:#fff;min-width:36px;text-align:center">'+cl+'</span>' +
+        '<span class="comp-ov-elname">' + g.elName + '</span>' +
+        '<span class="comp-ov-jump">Open ›</span>' +
+      '</div>';
+    g.items.forEach(function(it){
+      var bdcc = it.cls==='J' ? 'var(--ne)' : it.cls==='O' ? 'var(--op)' : 'var(--tm)';
+      var bdcl = it.cls==='J' ? 'JA' : it.cls==='O' ? 'OPT' : 'N.V.T.';
+      html += '<div class="comp-ov-bd" data-jumpto-bd="'+it.bdName.replace(/"/g,'&quot;')+'" data-jumpto-el2="'+g.elName.replace(/"/g,'&quot;')+'">' +
+        '<span class="bd-chip" style="background:'+bdcc+';color:#fff;width:28px;text-align:center;display:inline-block">'+bdcl+'</span>' +
+        '<span class="comp-ov-bdname">' + it.bdName + '</span>' +
+        '<span class="comp-ov-complist">' + it.comps.join(', ') + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+
+  // Wire jump-to-bouwdeel clicks
+  body.querySelectorAll('[data-jumpto-bd]').forEach(function(row){
+    row.addEventListener('click', function(){
+      var elN = row.dataset.jumptoEl2;
+      var bdN = row.dataset.jumptoBd;
+      // Switch to info tab and open the bouwdeel detail
+      document.querySelectorAll('.dp-tab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelector('.dp-tab[data-tab="info"]').classList.add('active');
+      document.getElementById('dp-body').style.display = '';
+      document.getElementById('dp-comp-body').style.display = 'none';
+      renderBouwdeelDetail(boId, elN, bdN);
+    });
+  });
+  // Wire jump-to-element header clicks (open element overview)
+  body.querySelectorAll('[data-jumpto-el]').forEach(function(hdEl){
+    hdEl.addEventListener('click', function(){
+      var elN = hdEl.dataset.jumptoEl;
+      document.querySelectorAll('.dp-tab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelector('.dp-tab[data-tab="info"]').classList.add('active');
+      document.getElementById('dp-body').style.display = '';
+      document.getElementById('dp-comp-body').style.display = 'none';
+      renderElementDetail(boId, elN);
     });
   });
 }
