@@ -585,6 +585,29 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 .comp-ov-bdname{flex-shrink:0;font-size:11px;font-weight:600;color:var(--th);min-width:130px}
 .comp-ov-complist{font-size:11px;color:var(--tm);line-height:1.5}
 
+
+/* ── ELEMENT INSTANTIES (duplicaten zoals meerdere pompinstallaties) ── */
+.bo-el-dup{background:linear-gradient(90deg,var(--asf) 0%,transparent 8%)}
+.bo-el-dup-tag{
+  font-size:8px;font-weight:700;color:var(--acc);
+  background:var(--asf);padding:0 4px;border-radius:6px;margin-left:3px;
+  vertical-align:middle;
+}
+.bo-el-dupbtn{
+  flex-shrink:0;width:18px;height:18px;border:none;background:none;
+  color:var(--tm);cursor:pointer;border-radius:3px;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:.15s;
+}
+.bo-el-row:hover .bo-el-dupbtn{opacity:1}
+.bo-el-dupbtn:hover{background:var(--asf);color:var(--acc)}
+.bo-el-delbtn{
+  flex-shrink:0;width:18px;height:18px;border:none;background:none;
+  color:var(--tm);cursor:pointer;border-radius:3px;font-size:13px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.bo-el-delbtn:hover{background:var(--neb);color:var(--ne)}
+
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -737,7 +760,8 @@ function makeBO(code){
     maximo:'', status:'actief', bouwjaar:'', levensduur:'',
     adres:'', stad:'', lat:'', lon:'', notitie:'',
     photos:[], disabledEls:[], disabledBDs:{},
-    elNotes:{}, bdNotes:{}, components:{}
+    elNotes:{}, bdNotes:{}, components:{},
+    extraEls:[] // [{base:'Pompinstallatie', key:'Pompinstallatie#2', label:'Pompinstallatie #2'}, ...]
   };
 }
 
@@ -1215,31 +1239,32 @@ acts += '<button class="nact del" data-action="askdel" data-id="'+n.id+'">×</bu
     kidsPanel = '<div class="nd-kids" id="kids-'+n.id+'">'+cxForm+kidsHtml+strip+'</div>';
   } else if(bo && n.open) {
     // Show active elements inline under BO
-    var activeEls = bo.elementen.filter(function(e){
-      return (n.disabledEls||[]).indexOf(e.element) < 0;
-    }).slice().sort(function(a,b){ return a.element.localeCompare(b.element,'nl'); });
+    var activeEls = getActiveElementInstances(n, bo)
+      .slice().sort(function(a,b){ return a.label.localeCompare(b.label,'nl'); });
     var elRows = activeEls.map(function(e){
       var chip = e.classificatie==='JA'?'cja':e.classificatie==='OPTIONEEL'?'cop':'cne';
       var lbl  = e.classificatie==='OPTIONEEL'?'OPT':e.classificatie;
       var bdCount = BD ? (BD[e.element]||[]).length : 0;
-      var disabledBDcount = (n.disabledBDs && n.disabledBDs[e.element]) ? n.disabledBDs[e.element].length : 0;
-      // Count components across all bouwdelen of this element
+      var disabledBDcount = (n.disabledBDs && n.disabledBDs[e.key]) ? n.disabledBDs[e.key].length : 0;
+      // Count components across all bouwdelen of this element-instantie
       var elCompCount = 0;
       if(n.components){
         var elBds = BD ? (BD[e.element]||[]) : [];
         elBds.forEach(function(b){
-          var ck = e.element + '||' + b[0];
+          var ck = e.key + '||' + b[0];
           if(n.components[ck]) elCompCount += n.components[ck].length;
         });
       }
-      return '<div class="bo-el-row" data-boid="'+n.id+'" data-el="'+e.element.replace(/"/g,'&quot;')+'"'+
+      return '<div class="bo-el-row'+(e.isDup?' bo-el-dup':'')+'" data-boid="'+n.id+'" data-el="'+e.key.replace(/"/g,'&quot;')+'"'+
         ' style="cursor:pointer" title="Klik voor details">'+
         '<span class="echip2 '+chip+'">'+lbl+'</span>'+
-        '<span class="bo-el-name">'+e.element+'</span>'+
+        '<span class="bo-el-name">'+e.label+(e.isDup?' <span class=\'bo-el-dup-tag\'>kopie</span>':'')+'</span>'+
         (elCompCount > 0 ? '<span class="bo-el-comp-cnt" title="'+elCompCount+' componenten toegevoegd">&#9881; '+elCompCount+'</span>' : '')+
         '<span class="bo-el-bd-cnt">'+
           (bdCount > 0 ? (bdCount - disabledBDcount)+'/'+bdCount+' bd' : '')+
         '</span>'+
+        '<button class="bo-el-dupbtn" data-action="dupel" data-boid="'+n.id+'" data-base="'+e.element.replace(/"/g,'&quot;')+'" title="Dupliceer dit element (bijv. 2e pompinstallatie)">&#10697;</button>'+
+        (e.isDup ? '<button class="bo-el-delbtn" data-action="delelinst" data-boid="'+n.id+'" data-key="'+e.key.replace(/"/g,'&quot;')+'" title="Verwijder deze kopie">&times;</button>' : '')+
         '<span style="font-size:10px;color:var(--tm)">›</span>'+
       '</div>';
     }).join('');
@@ -1447,9 +1472,12 @@ function updateStats(){
 
 // ── BOUWDEEL DETAIL ─────────────────────────────────────────────
 function renderBouwdeelDetail(boId, elName, bdName){
+  // elName is de INSTANCE KEY; baseEl is de echte bibliotheeknaam voor BD-lookup
   var n  = findNode(boId);
+  var baseEl = n ? getElementBase(n, elName) : elName;
+  var displayElLabel = n ? getElementLabel(n, elName) : elName;
   var bo = n ? BOMAP[n.boCode] : null;
-  var bds = BD ? (BD[elName] || []) : [];
+  var bds = BD ? (BD[baseEl] || []) : [];
   var bdEntry = bds.filter(function(b){ return b[0]===bdName; })[0];
   var bdLib   = BD_LIB ? (BD_LIB[bdName] || {}) : {};
 
@@ -1477,7 +1505,7 @@ function renderBouwdeelDetail(boId, elName, bdName){
         (bo ? bo.code+' \u2014 '+(n.label||'') : '') +
       '</div>' +
       '<div style="font-size:11px;color:var(--tm);font-style:italic">' +
-        'Element: ' + elName +
+        'Element: ' + displayElLabel +
       '</div>' +
     '</div>' +
 
@@ -1601,6 +1629,12 @@ function renderBouwdeelDetail(boId, elName, bdName){
 
 // ── ELEMENT DETAIL ──────────────────────────────────────────────
 function renderElementDetail(boId, elName){
+  // elName is de INSTANCE KEY (bijv. 'Pompinstallatie' of 'Pompinstallatie#2').
+  // baseEl is de echte bibliotheeknaam, gebruikt voor alle EG/BD/REDEN lookups.
+  var _nForLabel = findNode(boId);
+  var baseEl = _nForLabel ? getElementBase(_nForLabel, elName) : elName;
+  var displayLabel = _nForLabel ? getElementLabel(_nForLabel, elName) : elName;
+
   selectedEl = {boId:boId, elName:elName};
 
   var panel = document.getElementById('detail-panel');
@@ -1609,10 +1643,10 @@ function renderElementDetail(boId, elName){
   if(dtabs) dtabs.style.display = 'none';
   document.getElementById('map-container').classList.remove('vis');
   document.getElementById('dp-body').style.display = '';
-  document.getElementById('dp-title').textContent = elName;
+  document.getElementById('dp-title').textContent = displayLabel;
 
-  var elInfo = EG ? (EG[elName] || {}) : {};
-  var bds    = BD ? (BD[elName] || []) : [];
+  var elInfo = EG ? (EG[baseEl] || {}) : {};
+  var bds    = BD ? (BD[baseEl] || []) : [];
   var curF   = 'all';
   var onlyComp = false; // toggle: alleen bouwdelen met componenten
 
@@ -1674,13 +1708,18 @@ function renderElementDetail(boId, elName){
     document.getElementById('dp-body').innerHTML =
       '<div class="el-detail-section">' +
         '<div class="el-groep-badge">' + (elInfo.groep || 'Onbekend') + '</div>' +
+        (displayLabel !== baseEl ? '<div style="font-size:11px;color:var(--acc);font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px">' +
+            '<span>' + displayLabel + '</span>' +
+            '<span style="color:var(--tm);font-weight:500;font-size:10px">(instantie van ' + baseEl + ')</span>' +
+            '<button id="el-inst-rename" style="margin-left:auto;padding:1px 7px;border:1px solid var(--bdr);background:var(--sur);border-radius:4px;font-size:9px;font-weight:600;color:var(--tb);cursor:pointer">Naam aanpassen</button>' +
+          '</div>' : '') +
         '<div style="font-size:10px;color:var(--tm);font-weight:700;margin-bottom:3px">Code: ' + (elInfo.code || '—') + '</div>' +
         '<div class="el-werkdef">' + (elInfo.werkdefinitie || '') + '</div>' +
         (elInfo.toelichting ? '<div class="el-toelichting">' + elInfo.toelichting + '</div>' : '') +
       '</div>' +
       '<div class="dp-sec" style="padding:8px 14px 4px">' +
         '<div class="dp-sec-title">FTA Redenering</div>' +
-        '<div class="el-fta-box">' + (REDEN ? (REDEN[elName] || 'Geen redenering beschikbaar') : '') + '</div>' +
+        '<div class="el-fta-box">' + (REDEN ? (REDEN[baseEl] || 'Geen redenering beschikbaar') : '') + '</div>' +
       '</div>' +
       '<div class="dp-sec">' +
         '<div class="dp-sec-title">Notitie bij dit element</div>' +
@@ -1725,6 +1764,17 @@ function renderElementDetail(boId, elName){
         saveElNote(inp2.dataset.boid, inp2.dataset.el, inp2.value);
         elSaveBtn2.textContent = '✓ Opgeslagen';
         setTimeout(function(){ elSaveBtn2.textContent='Opslaan'; }, 1500);
+      });
+    }
+
+    // Wire instance rename button (alleen zichtbaar bij gedupliceerde elementen)
+    var renameBtn = document.getElementById('el-inst-rename');
+    if(renameBtn){
+      renameBtn.addEventListener('click', function(){
+        var nieuweNaam = window.prompt('Eigen naam voor deze instantie:', displayLabel);
+        if(nieuweNaam !== null){
+          renameElementInstance(boId, elName, nieuweNaam);
+        }
       });
     }
 
@@ -3012,6 +3062,15 @@ function deepCloneNode(node){
       clone.disabledBDs = dbd;
     } else if(k === 'photos'){
       clone.photos = (node.photos||[]).slice();
+    } else if(k === 'extraEls'){
+      clone.extraEls = (node.extraEls||[]).map(function(ex){ return {base:ex.base, key:ex.key, label:ex.label}; });
+    } else if(k === 'elNotes' || k === 'bdNotes' || k === 'components'){
+      var copy = {};
+      var src = node[k] || {};
+      for(var ck in src){
+        copy[ck] = Array.isArray(src[ck]) ? src[ck].slice() : src[ck];
+      }
+      clone[k] = copy;
     } else {
       clone[k] = node[k];
     }
@@ -3329,6 +3388,89 @@ function renderCompList(boId, elName, bdName){
   }
 }
 
+
+// ── ELEMENT DUPLICATIE (meerdere instanties van hetzelfde element, bijv. 4x Pompinstallatie) ──
+function getElementBase(n, instanceKey){
+  // Voor een instanceKey zoals 'Pompinstallatie#2', geef de echte bibliotheeknaam terug ('Pompinstallatie')
+  if(n && n.extraEls){
+    for(var i=0;i<n.extraEls.length;i++){
+      if(n.extraEls[i].key === instanceKey) return n.extraEls[i].base;
+    }
+  }
+  return instanceKey; // origineel: key === naam
+}
+
+function getElementLabel(n, instanceKey){
+  // Geef het weergave-label terug (kan custom zijn aangepast)
+  if(n && n.extraEls){
+    for(var i=0;i<n.extraEls.length;i++){
+      if(n.extraEls[i].key === instanceKey) return n.extraEls[i].label || instanceKey;
+    }
+  }
+  return instanceKey;
+}
+
+function duplicateElement(boId, baseElement){
+  var n = findNode(boId); if(!n) return;
+  n.extraEls = n.extraEls || [];
+  // Tel hoeveel instanties van dit element al bestaan (origineel + extra's)
+  var existingCount = 1; // het origineel telt als #1
+  n.extraEls.forEach(function(ex){ if(ex.base === baseElement) existingCount++; });
+  var newNum = existingCount + 1;
+  var newKey = baseElement + '#' + newNum;
+  n.extraEls.push({ base: baseElement, key: newKey, label: baseElement + ' #' + newNum });
+  autoSave();
+  render();
+}
+
+function removeElementInstance(boId, instanceKey){
+  var n = findNode(boId); if(!n) return;
+  n.extraEls = (n.extraEls||[]).filter(function(ex){ return ex.key !== instanceKey; });
+  // Ruim bijbehorende state op
+  if(n.disabledBDs) delete n.disabledBDs[instanceKey];
+  if(n.elNotes) delete n.elNotes[instanceKey];
+  if(n.bdNotes){
+    Object.keys(n.bdNotes).forEach(function(k){ if(k.indexOf(instanceKey+'||')===0) delete n.bdNotes[k]; });
+  }
+  if(n.components){
+    Object.keys(n.components).forEach(function(k){ if(k.indexOf(instanceKey+'||')===0) delete n.components[k]; });
+  }
+  autoSave();
+  render();
+}
+
+function renameElementInstance(boId, instanceKey, newLabel){
+  var n = findNode(boId); if(!n || !n.extraEls) return;
+  newLabel = (newLabel||'').trim();
+  for(var i=0;i<n.extraEls.length;i++){
+    if(n.extraEls[i].key === instanceKey){
+      n.extraEls[i].label = newLabel || n.extraEls[i].key;
+      break;
+    }
+  }
+  autoSave();
+  render();
+}
+
+// Geeft alle actieve element-INSTANTIES terug (origineel + duplicaten), elk met {element, key, label, classificatie, isDup}
+function getActiveElementInstances(n, bo){
+  var disabled = n.disabledEls || [];
+  var result = [];
+  bo.elementen.forEach(function(e){
+    if(disabled.indexOf(e.element) < 0){
+      result.push({ element:e.element, key:e.element, label:e.element, classificatie:e.classificatie, isDup:false });
+    }
+  });
+  (n.extraEls||[]).forEach(function(ex){
+    // Alleen tonen als het basiselement zelf nog actief is (anders is dupliceren zinloos)
+    if(disabled.indexOf(ex.base) >= 0) return;
+    var baseEntry = bo.elementen.filter(function(e){ return e.element===ex.base; })[0];
+    if(!baseEntry) return;
+    result.push({ element:ex.base, key:ex.key, label:ex.label||ex.key, classificatie:baseEntry.classificatie, isDup:true });
+  });
+  return result;
+}
+
 /* Boot */
 document.addEventListener('DOMContentLoaded', function(){
   initData();
@@ -3350,6 +3492,20 @@ document.addEventListener('DOMContentLoaded', function(){
   // Delegated element row click — registered once after DOM exists
   document.getElementById('tree-area').addEventListener('click', function(e){
     var t = e.target;
+    // Element dupliceren (bijv. 2e/3e/4e pompinstallatie)
+    var dupBtn = t.closest('[data-action="dupel"]');
+    if(dupBtn){
+      e.stopPropagation();
+      duplicateElement(dupBtn.dataset.boid, dupBtn.dataset.base);
+      return;
+    }
+    // Element-instantie verwijderen (alleen kopieën, niet het origineel)
+    var delBtn = t.closest('[data-action="delelinst"]');
+    if(delBtn){
+      e.stopPropagation();
+      removeElementInstance(delBtn.dataset.boid, delBtn.dataset.key);
+      return;
+    }
     // Bulk select/deselect elements
     var bk = t.closest('[data-bulkel]');
     if(bk){
