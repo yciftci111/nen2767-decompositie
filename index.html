@@ -58,7 +58,7 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 .add-inp:focus{border-color:var(--acc)}
 .add-btn{padding:7px 14px;background:var(--acc);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
 .add-btn:hover{background:var(--amd)}
-.toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-shrink:0;position:relative}
 .tbtn{padding:5px 9px;border:1px solid var(--bdr);background:var(--sur);border-radius:var(--r);font-size:11px;color:var(--tb);cursor:pointer;transition:.15s;white-space:nowrap}
 .tbtn:hover{border-color:var(--amd);background:var(--asf);color:var(--acc)}
 .tsep{width:1px;height:20px;background:var(--bdr)}
@@ -203,12 +203,20 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 #map-container{display:none;height:220px;flex-shrink:0;min-height:120px;position:relative}
 #map-container.vis{display:block}
 .resize-handle-v{
-  height:5px;flex-shrink:0;cursor:row-resize;
-  background:var(--bdr);transition:background .15s;
-  display:none;
+  height:7px;flex-shrink:0;cursor:row-resize;
+  background:var(--bdr);transition:background .15s,height .15s;
+  display:none;position:relative;
 }
 .resize-handle-v.vis{display:block}
-.resize-handle-v:hover,.resize-handle-v.dragging{background:var(--acc)}
+.resize-handle-v:hover,.resize-handle-v.dragging{background:var(--acc);height:9px}
+.resize-handle-v::after{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:40px;height:3px;border-radius:2px;
+  background:rgba(0,0,0,.18);
+  transition:background .15s;
+}
+.resize-handle-v:hover::after{background:rgba(255,255,255,.6)}
 
 
 /* ── BOUWDEEL DETAIL ── */
@@ -246,18 +254,20 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 
 /* ── RESIZABLE PANELS ── */
 .resize-handle{
-  width:5px;flex-shrink:0;cursor:col-resize;
+  width:7px;flex-shrink:0;cursor:col-resize;
   background:var(--bdr);
-  transition:background .15s;
+  transition:background .15s,width .15s;
   position:relative;z-index:10;
 }
-.resize-handle:hover,.resize-handle.dragging{background:var(--acc)}
+.resize-handle:hover,.resize-handle.dragging{background:var(--acc);width:9px}
 .resize-handle::after{
   content:'';position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  width:3px;height:32px;border-radius:2px;
-  background:rgba(0,0,0,.15);
+  width:3px;height:40px;border-radius:2px;
+  background:rgba(0,0,0,.18);
+  transition:background .15s;
 }
+.resize-handle:hover::after{background:rgba(255,255,255,.6)}
 
 /* ── MAP FILTER OVERLAY ── */
 .map-overlay{
@@ -608,6 +618,178 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
 }
 .bo-el-delbtn:hover{background:var(--neb);color:var(--ne)}
 
+
+/* ── BOUWDEEL INSTANTIES (duplicaten zoals meerdere afsluiters) ── */
+.bd-row-dup{background:linear-gradient(90deg,var(--asf) 0%,transparent 6%)}
+.bd-dup-tag{
+  font-size:8px;font-weight:700;color:var(--acc);
+  background:var(--asf);padding:0 4px;border-radius:6px;margin-left:3px;
+  vertical-align:middle;
+}
+.bd-dupbtn{
+  flex-shrink:0;width:18px;height:18px;border:none;background:none;
+  color:var(--tm);cursor:pointer;border-radius:3px;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:.15s;align-self:flex-start;margin-top:2px;
+}
+.bd-row:hover .bd-dupbtn{opacity:1}
+.bd-dupbtn:hover{background:var(--asf);color:var(--acc)}
+.bd-delbtn{
+  flex-shrink:0;width:18px;height:18px;border:none;background:none;
+  color:var(--tm);cursor:pointer;border-radius:3px;font-size:13px;line-height:1;
+  display:flex;align-items:center;justify-content:center;align-self:flex-start;margin-top:2px;
+}
+.bd-delbtn:hover{background:var(--neb);color:var(--ne)}
+
+
+/* ── PDF RAPPORTINSTELLINGEN ── */
+.pdf-settings-btn{
+  padding:6px 8px;border:1px solid var(--bdr);border-radius:var(--r);
+  background:var(--sur);color:var(--tm);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.pdf-settings-btn:hover{border-color:var(--acc);color:var(--acc);background:var(--asf)}
+.pdf-settings-popover{
+  display:none;position:absolute;z-index:50;
+  top:100%;margin-top:6px;left:0;
+  width:280px;padding:14px;border-radius:8px;
+  background:var(--sur);border:1px solid var(--bdr);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+.pdf-settings-popover.vis{display:block}
+.pdf-settings-title{font-size:12px;font-weight:700;color:var(--th);margin-bottom:10px}
+.pdf-settings-label{display:block;font-size:10px;font-weight:600;color:var(--tm);margin-bottom:3px;margin-top:8px}
+.pdf-settings-inp{
+  width:100%;padding:7px 9px;border:1px solid var(--bdr);border-radius:5px;
+  font-size:12px;color:var(--th);outline:none;font-family:inherit;box-sizing:border-box;
+}
+.pdf-settings-inp:focus{border-color:var(--acc)}
+.pdf-settings-save{
+  width:100%;margin-top:12px;padding:7px;background:var(--acc);color:#fff;
+  border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;
+}
+
+
+/* ── ELEMENT ZOEKEN (BO info-paneel) ── */
+.el-search-wrap{position:relative;padding:8px 14px 0}
+.el-search-inp{
+  width:100%;padding:6px 28px 6px 28px;border:1px solid var(--bdr);border-radius:var(--r);
+  font-size:12px;color:var(--th);outline:none;transition:border-color .15s;box-sizing:border-box;
+}
+.el-search-inp:focus{border-color:var(--acc)}
+.el-search-icon{position:absolute;left:21px;top:50%;transform:translateY(-50%);color:var(--tm);pointer-events:none}
+.el-search-clear{
+  position:absolute;right:21px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--tm);cursor:pointer;font-size:15px;line-height:1;padding:2px 4px;
+}
+.el-search-clear:hover{color:var(--ne)}
+
+
+/* ── KAART VERGROTEN KNOP ── */
+.map-expand-btn{
+  position:absolute;bottom:34px;right:10px;z-index:1001;
+  display:flex;align-items:center;gap:5px;
+  padding:6px 11px;border:none;border-radius:6px;
+  background:rgba(255,255,255,.95);color:var(--th);
+  font-size:11px;font-weight:600;cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
+  transition:.15s;
+}
+.map-expand-btn:hover{background:var(--acc);color:#fff}
+
+
+/* ── GELEENDE / VRIJE ELEMENTEN (cross-bibliotheek items) ── */
+.echip2.ccu{background:var(--c1)}
+.bo-el-borrow-tag{
+  font-size:8px;font-weight:700;color:#6B3FA0;
+  background:#F1EAFA;padding:0 5px;border-radius:6px;margin-left:3px;
+  vertical-align:middle;white-space:nowrap;
+}
+.bo-el-custom-tag{
+  font-size:8px;font-weight:700;color:var(--tm);
+  background:var(--s2);border:1px dashed var(--bdr);padding:0 5px;border-radius:6px;margin-left:3px;
+  vertical-align:middle;white-space:nowrap;
+}
+.bo-el-borrowed{background:linear-gradient(90deg,#F8F4FC 0%,transparent 8%)}
+.bo-el-customrow{background:linear-gradient(90deg,var(--s2) 0%,transparent 8%)}
+
+
+/* ── ELEMENT/BOUWDEEL PICKER MODAL ── */
+.picker-modal-overlay{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(13,27,42,.45);
+  display:flex;align-items:center;justify-content:center;
+}
+.picker-modal{
+  width:560px;max-width:92vw;max-height:80vh;
+  background:var(--sur);border-radius:10px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 16px 48px rgba(0,0,0,.25);
+}
+.picker-modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;background:var(--acc);color:#fff;flex-shrink:0;
+}
+.picker-modal-title{font-size:14px;font-weight:700}
+.picker-modal-close{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;padding:2px 6px}
+.picker-modal-close:hover{opacity:.7}
+.picker-modal-tabs{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.picker-tab{
+  flex:1;text-align:center;padding:10px;font-size:12px;font-weight:600;
+  color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;
+}
+.picker-tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.picker-modal-body{flex:1;overflow-y:auto;padding:14px 18px;min-height:200px}
+
+.picker-search-inp{
+  width:100%;padding:9px 12px;border:1px solid var(--bdr);border-radius:6px;
+  font-size:13px;color:var(--th);outline:none;box-sizing:border-box;margin-bottom:10px;
+}
+.picker-search-inp:focus{border-color:var(--acc)}
+.picker-result-row{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;
+  cursor:pointer;transition:background .12s;
+}
+.picker-result-row:hover{background:var(--asf)}
+.picker-result-name{flex:1;font-size:12.5px;font-weight:600;color:var(--th)}
+.picker-result-source{font-size:10px;color:var(--tm)}
+.picker-empty{text-align:center;padding:30px 10px;color:var(--tm);font-size:12px}
+
+.picker-custom-form label{display:block;font-size:11px;font-weight:600;color:var(--tm);margin-bottom:4px;margin-top:12px}
+.picker-custom-form label:first-child{margin-top:0}
+.picker-custom-form input,.picker-custom-form textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--bdr);border-radius:6px;
+  font-size:13px;color:var(--th);outline:none;box-sizing:border-box;font-family:inherit;
+}
+.picker-custom-form textarea{resize:vertical;min-height:60px}
+.picker-custom-form input:focus,.picker-custom-form textarea:focus{border-color:var(--acc)}
+.picker-custom-note{
+  margin-top:14px;padding:10px 12px;background:var(--asf);border-radius:6px;
+  font-size:11px;color:var(--tb);line-height:1.5;
+}
+.picker-custom-submit{
+  width:100%;margin-top:14px;padding:9px;background:var(--acc);color:#fff;
+  border:none;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;
+}
+.bk-addel{margin-left:auto;color:var(--acc);border-color:var(--acc)}
+.bk-addel:hover{background:var(--asf)}
+
+
+/* ── GELEENDE / VRIJE BOUWDELEN ── */
+.bd-chip.ccu{background:var(--c1)}
+.bd-borrow-tag{
+  font-size:8px;font-weight:700;color:#6B3FA0;
+  background:#F1EAFA;padding:0 5px;border-radius:6px;margin-left:3px;
+  vertical-align:middle;white-space:nowrap;
+}
+.bd-custom-tag{
+  font-size:8px;font-weight:700;color:var(--tm);
+  background:var(--s2);border:1px dashed var(--bdr);padding:0 5px;border-radius:6px;margin-left:3px;
+  vertical-align:middle;white-space:nowrap;
+}
+.bd-row-borrowed{background:linear-gradient(90deg,#F8F4FC 0%,transparent 6%)}
+.bd-row-custom{background:linear-gradient(90deg,var(--s2) 0%,transparent 6%)}
+
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -662,6 +844,17 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         PDF Rapport
       </button>
+      <button class="pdf-settings-btn" id="btn-pdf-settings" title="Rapporttitel aanpassen">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+      <div class="pdf-settings-popover" id="pdf-settings-popover">
+        <div class="pdf-settings-title">Rapporttitel</div>
+        <label class="pdf-settings-label">Hoofdtitel</label>
+        <input type="text" class="pdf-settings-inp" id="pdf-title-inp" placeholder="Decompositierapport">
+        <label class="pdf-settings-label">Ondertitel</label>
+        <input type="text" class="pdf-settings-inp" id="pdf-subtitle-inp" placeholder="Sturen op prestaties van systemen">
+        <button class="pdf-settings-save" id="pdf-settings-save">Opslaan</button>
+      </div>
       <button class="pdf-btn" id="btn-excel" style="border-color:#1A7A4A;color:#1A7A4A" onmouseover="this.style.background='#E8F5EE'" onmouseout="this.style.background=''">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18M15 3v18"/></svg>
         Excel Export
@@ -700,12 +893,30 @@ main{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column
       <div class="dp-tab" data-tab="map">🗺 Kaart</div>
       <div class="dp-tab" data-tab="comp" id="dp-tab-comp">⚙ Componenten</div>
     </div>
-    <div id="map-container"></div>
+    <div id="map-container">
+      <button class="map-expand-btn" id="map-expand-btn" title="Kaart vergroten / verkleinen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="map-expand-icon"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span id="map-expand-label">Kaart vergroten</span>
+      </button>
+    </div>
     <div class="resize-handle-v" id="rh-map" title="Versleep om kaart groter te maken"></div>
     <div class="dp-body" id="dp-body">
       <div class="dp-empty"><p>Klik op een beheerobject<br>om details te tonen</p></div>
     </div>
     <div class="dp-body" id="dp-comp-body" style="display:none"></div>
+  </div>
+</div>
+<div id="el-picker-modal" class="picker-modal-overlay" style="display:none">
+  <div class="picker-modal">
+    <div class="picker-modal-head">
+      <span class="picker-modal-title" id="picker-modal-title">Element toevoegen</span>
+      <button class="picker-modal-close" id="picker-modal-close">&times;</button>
+    </div>
+    <div class="picker-modal-tabs">
+      <div class="picker-tab active" data-ptab="library">Uit bibliotheek</div>
+      <div class="picker-tab" data-ptab="custom">Vrij toevoegen</div>
+    </div>
+    <div class="picker-modal-body" id="picker-modal-body"></div>
   </div>
 </div>
 <div id="ghost"></div>
@@ -747,6 +958,7 @@ var tree = [];
 var UID  = 1;
 var selectedId = null;
 var detailELF  = 'all';
+var detailELQ  = '';
 var inputVals  = {};
 
 function nid(){ return 'n'+(UID++); }
@@ -761,7 +973,8 @@ function makeBO(code){
     adres:'', stad:'', lat:'', lon:'', notitie:'',
     photos:[], disabledEls:[], disabledBDs:{},
     elNotes:{}, bdNotes:{}, components:{},
-    extraEls:[] // [{base:'Pompinstallatie', key:'Pompinstallatie#2', label:'Pompinstallatie #2'}, ...]
+    extraEls:[], // [{base:'Pompinstallatie', key:'Pompinstallatie#2', label:'Pompinstallatie #2'}, ...]
+    extraBds:{}  // { 'elKey': [{base:'Afsluiter', key:'Afsluiter#2', label:'Afsluiter #2'}, ...] }
   };
 }
 
@@ -958,6 +1171,8 @@ function selectBO(id){
   } else {
     selectedId=id;
     n.open=true;
+    detailELQ = ''; // reset zoekterm bij wisselen naar een ander beheerobject
+    detailELF = 'all';
   }
   render();
   renderDetail(id);
@@ -967,7 +1182,17 @@ function selectBO(id){
 function closeDetail(){
   selectedId=null;
   selectedEl=null;
-  document.getElementById('detail-panel').classList.add('closed');
+  var panel = document.getElementById('detail-panel');
+  panel.classList.add('closed');
+  // Reset eventuele 'kaart vergroten'-breedte/hoogte zodat het paneel bij de volgende keer openen
+  // weer met de standaardafmeting start, in plaats van onbedoeld groot te blijven.
+  if(_mapExpanded){
+    _mapExpanded = false;
+    panel.style.width = '';
+    panel.style.minWidth = '';
+    var mapCont = document.getElementById('map-container');
+    if(mapCont) mapCont.style.height = '';
+  }
   render();
 }
 
@@ -978,7 +1203,12 @@ function renderDetail(id){
 
   var disabled = n.disabledEls || [];
   var f = detailELF;
-  var els = bo ? bo.elementen.filter(function(e){ return f==='all' || e.classificatie===f; }) : [];
+  var q = (detailELQ||'').toLowerCase();
+  var els = bo ? bo.elementen
+    .filter(function(e){ return f==='all' || e.classificatie===f; })
+    .filter(function(e){ return !q || e.element.toLowerCase().indexOf(q) >= 0; })
+    .slice().sort(function(a,b){ return a.element.localeCompare(b.element,'nl'); })
+    : [];
 
   var statusOpts = ['actief','inactief','onderhoud'].map(function(s){
     return '<option value="'+s+'"'+(n.status===s?' selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';
@@ -1039,8 +1269,13 @@ function renderDetail(id){
     '</div>'+
     '<div class="dp-sec" style="padding:0;border:none">'+
       '<div class="dp-sec-title" style="padding:10px 14px 4px">Elementen — '+els.length+' getoond · '+disabled.length+' uitgeschakeld</div>'+
+      '<div class="el-search-wrap">'+
+        '<svg class="el-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'+
+        '<input type="text" class="el-search-inp" id="el-search-'+id+'" placeholder="Zoek element\u2026" value="'+(detailELQ||'').replace(/"/g,'&quot;')+'">'+
+        (detailELQ ? '<button class="el-search-clear" id="el-search-clear-'+id+'">&times;</button>' : '')+
+      '</div>'+
       '<div class="el-fbar2">'+efTabs+'</div>'+
-      '<div class="el-list2">'+(elRows||'<span style="font-size:11px;color:var(--tm)">Geen elementen</span>')+'</div>'+
+      '<div class="el-list2">'+(elRows||'<span style="font-size:11px;color:var(--tm);padding:10px 14px;display:block">'+(detailELQ?'Geen elementen gevonden voor \u201c'+detailELQ+'\u201d':'Geen elementen')+'</span>')+'</div>'+
     '</div>';
 
   // Wire save buttons
@@ -1086,6 +1321,29 @@ function renderDetail(id){
       renderDetail(tab.dataset.nid);
     });
   });
+
+  // Wire element zoekveld (met focus-behoud + cursorpositie-herstel)
+  var elSearchInp = document.getElementById('el-search-'+id);
+  if(elSearchInp){
+    elSearchInp.addEventListener('input', function(){
+      var cursorPos = elSearchInp.selectionStart;
+      detailELQ = elSearchInp.value;
+      renderDetail(id);
+      // Herstel focus + cursorpositie na de re-render (anders verlies je focus per toets)
+      var freshInp = document.getElementById('el-search-'+id);
+      if(freshInp){
+        freshInp.focus();
+        freshInp.setSelectionRange(cursorPos, cursorPos);
+      }
+    });
+  }
+  var elSearchClear = document.getElementById('el-search-clear-'+id);
+  if(elSearchClear){
+    elSearchClear.addEventListener('click', function(){
+      detailELQ = '';
+      renderDetail(id);
+    });
+  }
 
   // Wire photo add
   var addBtn = document.getElementById('add-photo-btn-'+id);
@@ -1242,8 +1500,8 @@ acts += '<button class="nact del" data-action="askdel" data-id="'+n.id+'">×</bu
     var activeEls = getActiveElementInstances(n, bo)
       .slice().sort(function(a,b){ return a.label.localeCompare(b.label,'nl'); });
     var elRows = activeEls.map(function(e){
-      var chip = e.classificatie==='JA'?'cja':e.classificatie==='OPTIONEEL'?'cop':'cne';
-      var lbl  = e.classificatie==='OPTIONEEL'?'OPT':e.classificatie;
+      var chip = e.classificatie==='JA'?'cja':e.classificatie==='OPTIONEEL'?'cop':e.classificatie==='CUSTOM'?'ccu':'cne';
+      var lbl   = e.classificatie==='OPTIONEEL'?'OPT':e.classificatie==='CUSTOM'?'VRIJ':e.classificatie;
       var bdCount = BD ? (BD[e.element]||[]).length : 0;
       var disabledBDcount = (n.disabledBDs && n.disabledBDs[e.key]) ? n.disabledBDs[e.key].length : 0;
       // Count components across all bouwdelen of this element-instantie
@@ -1255,16 +1513,22 @@ acts += '<button class="nact del" data-action="askdel" data-id="'+n.id+'">×</bu
           if(n.components[ck]) elCompCount += n.components[ck].length;
         });
       }
-      return '<div class="bo-el-row'+(e.isDup?' bo-el-dup':'')+'" data-boid="'+n.id+'" data-el="'+e.key.replace(/"/g,'&quot;')+'"'+
+      var specialTag = e.isDup ? ' <span class="bo-el-dup-tag">kopie</span>'
+        : e.isBorrowed ? ' <span class="bo-el-borrow-tag" title="Geleend uit de bibliotheek van \'' + (e.borrowedFromLabel||'') + '\'">geleend van: ' + (e.borrowedFromLabel||'') + '</span>'
+        : e.isCustom ? ' <span class="bo-el-custom-tag">vrij toegevoegd</span>'
+        : '';
+      var canDup = !e.isDup && !e.isBorrowed && !e.isCustom; // dupliceren alleen voor eigen bibliotheek-elementen
+      return '<div class="bo-el-row'+(e.isDup?' bo-el-dup':'')+(e.isBorrowed?' bo-el-borrowed':'')+(e.isCustom?' bo-el-customrow':'')+'" data-boid="'+n.id+'" data-el="'+e.key.replace(/"/g,'&quot;')+'"'+
         ' style="cursor:pointer" title="Klik voor details">'+
         '<span class="echip2 '+chip+'">'+lbl+'</span>'+
-        '<span class="bo-el-name">'+e.label+(e.isDup?' <span class=\'bo-el-dup-tag\'>kopie</span>':'')+'</span>'+
+        '<span class="bo-el-name">'+e.label+specialTag+'</span>'+
         (elCompCount > 0 ? '<span class="bo-el-comp-cnt" title="'+elCompCount+' componenten toegevoegd">&#9881; '+elCompCount+'</span>' : '')+
         '<span class="bo-el-bd-cnt">'+
           (bdCount > 0 ? (bdCount - disabledBDcount)+'/'+bdCount+' bd' : '')+
         '</span>'+
-        '<button class="bo-el-dupbtn" data-action="dupel" data-boid="'+n.id+'" data-base="'+e.element.replace(/"/g,'&quot;')+'" title="Dupliceer dit element (bijv. 2e pompinstallatie)">&#10697;</button>'+
+        (canDup ? '<button class="bo-el-dupbtn" data-action="dupel" data-boid="'+n.id+'" data-base="'+e.element.replace(/"/g,'&quot;')+'" title="Dupliceer dit element (bijv. 2e pompinstallatie)">&#10697;</button>' : '')+
         (e.isDup ? '<button class="bo-el-delbtn" data-action="delelinst" data-boid="'+n.id+'" data-key="'+e.key.replace(/"/g,'&quot;')+'" title="Verwijder deze kopie">&times;</button>' : '')+
+        ((e.isBorrowed || e.isCustom) ? '<button class="bo-el-delbtn" data-action="delelinst" data-boid="'+n.id+'" data-key="'+e.key.replace(/"/g,'&quot;')+'" title="Verwijder dit '+(e.isBorrowed?'geleende':'vrije')+' element">&times;</button>' : '')+
         '<span style="font-size:10px;color:var(--tm)">›</span>'+
       '</div>';
     }).join('');
@@ -1275,6 +1539,7 @@ acts += '<button class="nact del" data-action="askdel" data-id="'+n.id+'">×</bu
           '<button class="bk-btn" data-bulkel="all" data-boid="'+n.id+'">\u2713 Alles</button>'+
           '<button class="bk-btn bk-off" data-bulkel="none" data-boid="'+n.id+'">\u2715 Geen</button>'+
           '<span style="color:var(--tm);font-size:10px">'+(n.disabledEls||[]).length+' uit</span>'+
+          '<button class="bk-btn bk-addel" data-action="openelpicker" data-boid="'+n.id+'" title="Element lenen uit andere bibliotheek, of vrij element toevoegen">+ Element</button>'+
         '</div>'+
       '</div>'+
       '<div class="bo-el-rows">'+elRows+'</div>'+
@@ -1370,7 +1635,7 @@ function attachTreeEvents(){
     // Deze acties worden elders (specifiekere delegated handlers) afgehandeld —
     // hier NIET registreren, anders vangt deze generieke listener de klik weg
     // (met stopPropagation) voordat de juiste handler hem bereikt.
-    if(act0==='dupel' || act0==='delelinst' || act0==='delcomp') return;
+    if(act0==='dupel' || act0==='delelinst' || act0==='delcomp' || act0==='dupbd' || act0==='delbdinst' || act0==='openelpicker' || act0==='openbdpicker') return;
 
     btn.addEventListener('click', function(e){
       e.stopPropagation();
@@ -1501,13 +1766,32 @@ function updateStats(){
 // ── BOUWDEEL DETAIL ─────────────────────────────────────────────
 function renderBouwdeelDetail(boId, elName, bdName){
   // elName is de INSTANCE KEY; baseEl is de echte bibliotheeknaam voor BD-lookup
+  // bdName is OOK een instance key (bijv. 'Afsluiter#2'); baseBd is de echte bouwdeelnaam
   var n  = findNode(boId);
   var baseEl = n ? getElementBase(n, elName) : elName;
   var displayElLabel = n ? getElementLabel(n, elName) : elName;
+  var baseBd = n ? getBouwdeelBase(n, elName, bdName) : bdName;
+  var displayBdLabel = n ? getBouwdeelLabel(n, elName, bdName) : bdName;
   var bo = n ? BOMAP[n.boCode] : null;
-  var bds = BD ? (BD[baseEl] || []) : [];
-  var bdEntry = bds.filter(function(b){ return b[0]===bdName; })[0];
-  var bdLib   = BD_LIB ? (BD_LIB[bdName] || {}) : {};
+
+  // Detecteer of dit bouwdeel GELEEND is van een ander element, of VRIJ is toegevoegd —
+  // in dat geval moet de classificatie/redenering NIET uit de eigen elementbouwdelen komen.
+  var bdExtraInfo = null;
+  if(n && n.extraBds && n.extraBds[elName]){
+    bdExtraInfo = n.extraBds[elName].filter(function(ex){ return ex.key === bdName; })[0] || null;
+  }
+  var bds, bdEntry;
+  if(bdExtraInfo && bdExtraInfo.borrowedFromElement){
+    bds = BD ? (BD[bdExtraInfo.borrowedFromElement] || []) : [];
+    bdEntry = bds.filter(function(b){ return b[0]===baseBd; })[0];
+  } else if(bdExtraInfo && bdExtraInfo.isCustom){
+    bds = [];
+    bdEntry = null; // custom: geen bibliotheek-classificatie
+  } else {
+    bds = BD ? (BD[baseEl] || []) : [];
+    bdEntry = bds.filter(function(b){ return b[0]===baseBd; })[0];
+  }
+  var bdLib = BD_LIB ? (BD_LIB[baseBd] || {}) : {};
 
   var panel = document.getElementById('detail-panel');
   panel.classList.remove('closed');
@@ -1515,12 +1799,17 @@ function renderBouwdeelDetail(boId, elName, bdName){
   if(dtabs) dtabs.style.display = 'none';
   document.getElementById('map-container').classList.remove('vis');
   document.getElementById('dp-body').style.display = '';
-  document.getElementById('dp-title').textContent = bdName;
+  document.getElementById('dp-title').textContent = displayBdLabel;
 
   var cls  = bdEntry ? bdEntry[1] : '';
   var reden = bdEntry ? bdEntry[2] : '';
-  var clsColor = cls==='J'?'var(--ne)':cls==='O'?'var(--op)':'var(--tm)';
-  var clsLabel = cls==='J'?'JA — Kritisch':cls==='O'?'OPT — Optioneel':'N.V.T.';
+  var isCustomBd = !!(bdExtraInfo && bdExtraInfo.isCustom);
+  if(isCustomBd){
+    var customBdInfo = (n && n.customBdData) ? (n.customBdData[elName+'||'+bdName] || {}) : {};
+    reden = customBdInfo.toelichting || '(geen toelichting opgegeven)';
+  }
+  var clsColor = isCustomBd ? 'var(--c1)' : cls==='J'?'var(--ne)':cls==='O'?'var(--op)':'var(--tm)';
+  var clsLabel = isCustomBd ? 'VRIJ — Ongeclassificeerd' : cls==='J'?'JA \u2014 Kritisch':cls==='O'?'OPT \u2014 Optioneel':'N.V.T.';
 
   document.getElementById('dp-body').innerHTML =
     '<div class="bd-detail-header">' +
@@ -1535,6 +1824,11 @@ function renderBouwdeelDetail(boId, elName, bdName){
       '<div style="font-size:11px;color:var(--tm);font-style:italic">' +
         'Element: ' + displayElLabel +
       '</div>' +
+      (displayBdLabel !== baseBd ? '<div style="font-size:11px;color:var(--acc);font-weight:700;margin-top:4px;display:flex;align-items:center;gap:6px">' +
+          '<span>' + displayBdLabel + '</span>' +
+          '<span style="color:var(--tm);font-weight:500;font-size:10px">(instantie van ' + baseBd + ')</span>' +
+          '<button id="bd-inst-rename" style="margin-left:auto;padding:1px 7px;border:1px solid var(--bdr);background:var(--sur);border-radius:4px;font-size:9px;font-weight:600;color:var(--tb);cursor:pointer">Naam aanpassen</button>' +
+        '</div>' : '') +
     '</div>' +
 
     (bdLib.werkdefinitie ? '<div class="dp-sec"><div class="dp-sec-title">Werkdefinitie</div>' +
@@ -1555,7 +1849,7 @@ function renderBouwdeelDetail(boId, elName, bdName){
     '<div class="dp-sec" style="border:none">' +
       '<div class="dp-sec-title">Context in rapport</div>' +
       '<div style="font-size:11px;color:var(--tm);line-height:1.6">' +
-        'Dit bouwdeel valt onder element <strong>'+elName+'</strong>.<br>' +
+        'Dit bouwdeel valt onder element <strong>'+displayElLabel+'</strong>.<br>' +
         (bdLib.vakdiscipline ? 'Vakdiscipline: <strong>'+bdLib.vakdiscipline+'</strong><br>' : '') +
         (bdLib.code ? 'NEN 2767 correspondentiecode: <strong>'+bdLib.code+'</strong>' : '') +
       '</div>' +
@@ -1591,6 +1885,17 @@ function renderBouwdeelDetail(boId, elName, bdName){
         saveBtn.textContent = '✓ Opgeslagen';
         inp.style.borderColor = 'var(--ja)';
         setTimeout(function(){ saveBtn.textContent = 'Opslaan'; inp.style.borderColor = ''; }, 1500);
+      });
+    }
+
+    // Wire bouwdeel-instantie rename knop
+    var bdRenameBtn = document.getElementById('bd-inst-rename');
+    if(bdRenameBtn){
+      bdRenameBtn.addEventListener('click', function(){
+        var nieuweNaam = window.prompt('Eigen naam voor deze bouwdeel-instantie:', displayBdLabel);
+        if(nieuweNaam !== null){
+          renameBouwdeelInstance(boId, elName, bdName, nieuweNaam);
+        }
       });
     }
   })();
@@ -1684,17 +1989,20 @@ function renderElementDetail(boId, elName){
   }
 
   function buildBody(){
+    window._refreshBdPanel = buildBody; // laat dupliceren/verwijderen alleen dit paneel verversen
     var disabled = getDisabled();   // always fresh from state
-    var bdsSorted = bds.slice().sort(function(a,b){ return a[0].localeCompare(b[0],'nl'); });
     var nodeForComp = findNode(boId);
-    function hasComp(bdCode){
-      var ck = elName + '||' + bdCode;
+    // Combineer bibliotheek-bouwdelen met handmatig gedupliceerde instanties
+    var bdInstances = getBouwdeelInstances(nodeForComp, elName, bds)
+      .slice().sort(function(a,b){ return a.label.localeCompare(b.label,'nl'); });
+    function hasComp(bdKey){
+      var ck = elName + '||' + bdKey;
       return !!(nodeForComp && nodeForComp.components && nodeForComp.components[ck] && nodeForComp.components[ck].length > 0);
     }
-    var totalCompBds = bdsSorted.filter(function(b){ return hasComp(b[0]); }).length;
-    var filtered = bdsSorted.filter(function(b){
-      if(onlyComp && !hasComp(b[0])) return false;
-      return curF === 'all' || b[1] === curF;
+    var totalCompBds = bdInstances.filter(function(b){ return hasComp(b.key); }).length;
+    var filtered = bdInstances.filter(function(b){
+      if(onlyComp && !hasComp(b.key)) return false;
+      return curF === 'all' || b.cls === curF;
     });
 
     // Save scroll
@@ -1710,26 +2018,34 @@ function renderElementDetail(boId, elName){
     }).join('');
 
     var bdRows = filtered.map(function(b){
-      var isOff = disabled.indexOf(b[0]) >= 0;
-      var chip  = b[1]==='J' ? 'cja' : b[1]==='O' ? 'cop' : 'cne';
-      var lbl   = b[1]==='J' ? 'JA'  : b[1]==='O' ? 'OPT' : 'NEE';
-      // Check if this bouwdeel already has components
-      var compKey = elName + '||' + b[0];
+      var isOff = disabled.indexOf(b.key) >= 0;
+      var chip  = b.cls==='J' ? 'cja' : b.cls==='O' ? 'cop' : b.cls==='CUSTOM' ? 'ccu' : 'cne';
+      var lbl   = b.cls==='J' ? 'JA'  : b.cls==='O' ? 'OPT' : b.cls==='CUSTOM' ? 'VRIJ' : 'NEE';
+      // Check if this bouwdeel-instantie al componenten heeft
+      var compKey = elName + '||' + b.key;
       var compN   = findNode(boId);
       var compCount = (compN && compN.components && compN.components[compKey]) ? compN.components[compKey].length : 0;
       var compBadge = compCount > 0
         ? '<span class="bd-has-comp" title="' + compCount + ' componenten">&#9881; ' + compCount + '</span>'
         : '';
-      return '<div class="bd-row' + (isOff ? ' off' : '') + '" data-bdname="' + b[0].replace(/"/g,'&quot;') + '">' +
+      var specialTag = b.isDup ? ' <span class="bd-dup-tag">kopie</span>'
+        : b.isBorrowed ? ' <span class="bd-borrow-tag" title="Geleend uit element \'' + (b.borrowedFromElement||'') + '\'">geleend van: ' + (b.borrowedFromElement||'') + '</span>'
+        : b.isCustom ? ' <span class="bd-custom-tag">vrij toegevoegd</span>'
+        : '';
+      var canDup = !b.isDup && !b.isBorrowed && !b.isCustom;
+      return '<div class="bd-row' + (isOff ? ' off' : '') + (b.isDup ? ' bd-row-dup' : '') + (b.isBorrowed ? ' bd-row-borrowed' : '') + (b.isCustom ? ' bd-row-custom' : '') + '" data-bdname="' + b.key.replace(/"/g,'&quot;') + '">' +
         '<input type="checkbox" class="bd-check"' + (isOff ? '' : ' checked') +
           ' data-boid="' + boId + '"' +
           ' data-el="'   + elName.replace(/"/g, '&quot;') + '"' +
-          ' data-bd="'   + b[0].replace(/"/g,   '&quot;') + '">' +
+          ' data-bd="'   + b.key.replace(/"/g,   '&quot;') + '">' +
         '<span class="bd-chip ' + chip + '">' + lbl + '</span>' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="bd-name"><span class="bd-name-txt">' + b[0] + '</span>' + compBadge + '</div>' +
-          '<div class="bd-rsn">'  + b[2] + '</div>' +
+          '<div class="bd-name"><span class="bd-name-txt">' + b.label + '</span>' + specialTag + compBadge + '</div>' +
+          '<div class="bd-rsn">'  + b.reden + '</div>' +
         '</div>' +
+        (canDup ? '<button class="bd-dupbtn" data-action="dupbd" data-boid="' + boId + '" data-elkey="' + elName.replace(/"/g,'&quot;') + '" data-base="' + b.base.replace(/"/g,'&quot;') + '" title="Dupliceer dit bouwdeel (bijv. 2e afsluiter)">&#10697;</button>' : '') +
+        (b.isDup ? '<button class="bd-delbtn" data-action="delbdinst" data-boid="' + boId + '" data-elkey="' + elName.replace(/"/g,'&quot;') + '" data-key="' + b.key.replace(/"/g,'&quot;') + '" title="Verwijder deze kopie">&times;</button>' : '') +
+        ((b.isBorrowed || b.isCustom) ? '<button class="bd-delbtn" data-action="delbdinst" data-boid="' + boId + '" data-elkey="' + elName.replace(/"/g,'&quot;') + '" data-key="' + b.key.replace(/"/g,'&quot;') + '" title="Verwijder dit ' + (b.isBorrowed?'geleende':'vrije') + ' bouwdeel">&times;</button>' : '') +
       '</div>';
     }).join('');
 
@@ -1747,7 +2063,12 @@ function renderElementDetail(boId, elName){
       '</div>' +
       '<div class="dp-sec" style="padding:8px 14px 4px">' +
         '<div class="dp-sec-title">FTA Redenering</div>' +
-        '<div class="el-fta-box">' + (REDEN ? (REDEN[baseEl] || 'Geen redenering beschikbaar') : '') + '</div>' +
+        '<div class="el-fta-box">' + (function(){
+          if(_nForLabel && _nForLabel.customElData && _nForLabel.customElData[elName]){
+            return _nForLabel.customElData[elName].toelichting || '(geen toelichting opgegeven)';
+          }
+          return REDEN ? (REDEN[baseEl] || 'Geen redenering beschikbaar') : '';
+        })() + '</div>' +
       '</div>' +
       '<div class="dp-sec">' +
         '<div class="dp-sec-title">Notitie bij dit element</div>' +
@@ -1771,6 +2092,7 @@ function renderElementDetail(boId, elName){
           (totalCompBds > 0
             ? '<button class="bk-btn'+(onlyComp?' bk-active':'')+'" id="bd-toggle-comp">&#9881; Alleen met componenten ('+totalCompBds+')</button>'
             : '')+
+          '<button class="bk-btn bk-addel" data-action="openbdpicker" data-boid="'+boId+'" data-elkey="'+elName.replace(/"/g,'&quot;')+'" title="Bouwdeel lenen uit ander element, of vrij bouwdeel toevoegen">+ Bouwdeel</button>'+
           '<span class="bd-bulk-count">'+(bds.length-disabled.length)+'/'+bds.length+' actief</span>'+
         '</div>' +
         '<div class="el-fbar2">' + filterTabs + '</div>' +
@@ -1820,6 +2142,24 @@ function renderElementDetail(boId, elName){
         buildBody();
         return;
       }
+      // Bouwdeel dupliceren (bijv. 2e/3e afsluiter)
+      var dupBdBtn = t.closest('[data-action="dupbd"]');
+      if(dupBdBtn){
+        duplicateBouwdeel(dupBdBtn.dataset.boid, dupBdBtn.dataset.elkey, dupBdBtn.dataset.base);
+        return;
+      }
+      // Bouwdeel-instantie verwijderen (alleen kopieën)
+      var delBdBtn = t.closest('[data-action="delbdinst"]');
+      if(delBdBtn){
+        removeBouwdeelInstance(delBdBtn.dataset.boid, delBdBtn.dataset.elkey, delBdBtn.dataset.key);
+        return;
+      }
+      // Bouwdeel-picker openen (lenen uit ander element / vrij toevoegen)
+      var bdPickerBtn = t.closest('[data-action="openbdpicker"]');
+      if(bdPickerBtn){
+        openBouwdeelPicker(bdPickerBtn.dataset.boid, bdPickerBtn.dataset.elkey);
+        return;
+      }
       // Bulk: alle bouwdelen aan
       if(t.id === 'bd-bulk-all'){
         var n2 = findNode(boId); if(!n2) return;
@@ -1829,11 +2169,12 @@ function renderElementDetail(boId, elName){
         buildBody();
         return;
       }
-      // Bulk: alle bouwdelen uit
+      // Bulk: alle bouwdelen uit (inclusief gedupliceerde instanties)
       if(t.id === 'bd-bulk-none'){
         var n2 = findNode(boId); if(!n2) return;
         n2.disabledBDs = n2.disabledBDs || {};
-        n2.disabledBDs[elName] = bds.map(function(b){ return b[0]; });
+        var allKeys = getBouwdeelInstances(n2, elName, bds).map(function(b){ return b.key; });
+        n2.disabledBDs[elName] = allKeys;
         autoSave();
         buildBody();
         return;
@@ -2159,6 +2500,46 @@ function renderComponentOverview(boId){
 
 
 // ── PANEL RESIZE ──────────────────────────────────────────────
+// ── KAART VERGROTEN/VERKLEINEN (snelkoppeling naast handmatig slepen) ──
+var _mapExpanded = false;
+var _mapPrevWidth = null; // onthoudt de breedte van vlak voor het vergroten
+
+var _mapPrevHeight = null; // onthoudt de kaarthoogte van vlak voor het vergroten
+
+function toggleMapExpand(){
+  var panel   = document.getElementById('detail-panel');
+  var mapCont = document.getElementById('map-container');
+  if(!panel || !mapCont) return;
+  var label = document.getElementById('map-expand-label');
+  var icon  = document.getElementById('map-expand-icon');
+
+  if(!_mapExpanded){
+    // Onthoud huidige breedte/hoogte zodat we ze later kunnen herstellen
+    _mapPrevWidth  = panel.offsetWidth;
+    _mapPrevHeight = mapCont.offsetHeight;
+    var wideWidth  = Math.round(window.innerWidth * 0.62);
+    var tallHeight = Math.round(window.innerHeight * 0.7);
+    panel.style.width       = wideWidth + 'px';
+    panel.style.minWidth    = wideWidth + 'px';
+    mapCont.style.height    = tallHeight + 'px';
+    _mapExpanded = true;
+    if(label) label.textContent = 'Kaart verkleinen';
+    if(icon)  icon.innerHTML = '<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  } else {
+    var restoreWidth  = _mapPrevWidth  || 360;
+    var restoreHeight = _mapPrevHeight || 220;
+    panel.style.width    = restoreWidth + 'px';
+    panel.style.minWidth = restoreWidth + 'px';
+    mapCont.style.height = restoreHeight + 'px';
+    _mapExpanded = false;
+    if(label) label.textContent = 'Kaart vergroten';
+    if(icon)  icon.innerHTML = '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  }
+  // Leaflet moet expliciet weten dat zijn container van grootte is veranderd,
+  // anders blijven de kaarttegels op de oude afmeting hangen.
+  if(_leafletMap) setTimeout(function(){ _leafletMap.invalidateSize(); }, 50);
+}
+
 function setupResizeHandles(){
   function makeResizable(handleId, getEl, side){
     var handle = document.getElementById(handleId);
@@ -2172,6 +2553,13 @@ function setupResizeHandles(){
       handle.classList.add('dragging');
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
+      // Bij handmatig slepen van het detailpaneel: 'kaart vergroten'-knop weer op standaardtekst,
+      // zodat de knopstatus niet uit sync raakt met de werkelijke breedte.
+      if(handleId === 'rh-right' && _mapExpanded){
+        _mapExpanded = false;
+        var lbl = document.getElementById('map-expand-label');
+        if(lbl) lbl.textContent = 'Kaart vergroten';
+      }
       e.preventDefault();
     });
 
@@ -2180,7 +2568,7 @@ function setupResizeHandles(){
       var delta = e.clientX - startX;
       var newW  = side === 'left'
         ? Math.max(160, Math.min(520, startW + delta))
-        : Math.max(240, Math.min(720, startW - delta));
+        : Math.max(240, Math.min(window.innerWidth * 0.75, startW - delta));
       getEl().style.width    = newW + 'px';
       getEl().style.minWidth = newW + 'px';
       // Invalidate map if open
@@ -2211,12 +2599,19 @@ function setupResizeHandles(){
       rhMap.classList.add('dragging');
       document.body.style.cursor='row-resize';
       document.body.style.userSelect='none';
+      // Bij handmatig slepen van de hoogte: 'kaart vergroten'-knop weer op standaardtekst,
+      // zodat de knopstatus niet uit sync raakt met de werkelijke afmeting.
+      if(_mapExpanded){
+        _mapExpanded = false;
+        var lbl = document.getElementById('map-expand-label');
+        if(lbl) lbl.textContent = 'Kaart vergroten';
+      }
       e.preventDefault();
     });
     document.addEventListener('mousemove',function(e){
       if(!vDragging) return;
       var delta=e.clientY - vStartY;
-      var newH=Math.max(120, Math.min(600, vStartH+delta));
+      var newH=Math.max(120, Math.min(window.innerHeight * 0.75, vStartH+delta));
       document.getElementById('map-container').style.height=newH+'px';
       if(_leafletMap) _leafletMap.invalidateSize();
     });
@@ -2262,7 +2657,7 @@ function generatePDF(){
     doc.addPage();y=22;
     F(NAVY);doc.rect(ML,8,CW,1.5,'F');
     N(7);T(GREY);
-    doc.text('PRA Decompositierapport \u2014 NEN 2767',ML,15);
+    doc.text(pdfReportTitle+' \u2014 NEN 2767',ML,15);
     doc.text(dateStr,PW-MR,15,{align:'right'});
     S([220,225,230],0.2);doc.line(ML,17.5,PW-MR,17.5);
   }
@@ -2340,11 +2735,14 @@ function generatePDF(){
   doc.roundedRect(ML,16,26,9,2,2,'F');
   T(WHITE);B(7.5);doc.text('NEN 2767',ML+13,21.8,{align:'center'});
 
-  T(WHITE);B(20);doc.text('Prestatiegestuurde Risicoanalyses (PRA)',ML+30,23);
-  B(13);doc.text('Decompositierapport',ML+30,33);
-  N(9);T([180,210,255]);doc.text('Sturen op prestaties van systemen',ML+30,42);
-  N(8);T([150,190,240]);doc.text(dateStr,ML+30,50);
-  y=64;
+  B(20);T(WHITE);
+  var titleLines=doc.splitTextToSize(pdfReportTitle, CW-30-4);
+  doc.text(titleLines,ML+30,23);
+  var titleExtraY = (titleLines.length-1)*8;
+  N(9);T([180,210,255]);
+  if(pdfReportSubtitle){ doc.text(pdfReportSubtitle,ML+30,33+titleExtraY); }
+  N(8);T([150,190,240]);doc.text(dateStr,ML+30,(pdfReportSubtitle?41:33)+titleExtraY);
+  y=Math.max(64, 55+titleExtraY);
 
   // Conclusie banner
   F(riskColor);doc.roundedRect(ML,y,CW,18,3,3,'F');
@@ -2787,7 +3185,7 @@ function generatePDF(){
     doc.setPage(pg);
     F(NAVY);doc.rect(0,PH-11,PW,11,'F');
     T([180,210,255]);N(7);
-    doc.text('PRA \u2014 NEN 2767 Decompositierapport',ML,PH-4.5);
+    doc.text('NEN 2767 '+pdfReportTitle,ML,PH-4.5);
     doc.text('Pagina '+pg+' / '+tp,PW-MR,PH-4.5,{align:'right'});
     T([150,190,240]);doc.text(dateStr,PW/2,PH-4.5,{align:'center'});
   }
@@ -3091,7 +3489,26 @@ function deepCloneNode(node){
     } else if(k === 'photos'){
       clone.photos = (node.photos||[]).slice();
     } else if(k === 'extraEls'){
-      clone.extraEls = (node.extraEls||[]).map(function(ex){ return {base:ex.base, key:ex.key, label:ex.label}; });
+      // Volledige kopie incl. lening-/custom-velden (anders verliest een gekloond BO
+      // de 'geleend van'/'vrij toegevoegd' status van zijn elementen)
+      clone.extraEls = (node.extraEls||[]).map(function(ex){
+        return {
+          base:ex.base, key:ex.key, label:ex.label,
+          borrowedFrom:ex.borrowedFrom, borrowedFromLabel:ex.borrowedFromLabel,
+          isCustom:ex.isCustom
+        };
+      });
+    } else if(k === 'extraBds'){
+      var dbds = {};
+      for(var elk in (node.extraBds||{})){
+        dbds[elk] = node.extraBds[elk].map(function(ex){
+          return {
+            base:ex.base, key:ex.key, label:ex.label,
+            borrowedFromElement:ex.borrowedFromElement, isCustom:ex.isCustom
+          };
+        });
+      }
+      clone.extraBds = dbds;
     } else if(k === 'elNotes' || k === 'bdNotes' || k === 'components'){
       var copy = {};
       var src = node[k] || {};
@@ -3099,6 +3516,16 @@ function deepCloneNode(node){
         copy[ck] = Array.isArray(src[ck]) ? src[ck].slice() : src[ck];
       }
       clone[k] = copy;
+    } else if(k === 'customElData'){
+      var celCopy = {};
+      var celSrc = node.customElData || {};
+      for(var celk in celSrc){ celCopy[celk] = { toelichting: celSrc[celk].toelichting }; }
+      clone.customElData = celCopy;
+    } else if(k === 'customBdData'){
+      var cbdCopy = {};
+      var cbdSrc = node.customBdData || {};
+      for(var cbdk in cbdSrc){ cbdCopy[cbdk] = { toelichting: cbdSrc[cbdk].toelichting }; }
+      clone.customBdData = cbdCopy;
     } else {
       clone[k] = node[k];
     }
@@ -3451,12 +3878,53 @@ function duplicateElement(boId, baseElement){
   render();
 }
 
+// ── ELEMENT LENEN van een ANDER beheerobject in de bibliotheek ──
+// Voegt een element toe dat in de bibliotheek bij een ander beheerobject-type hoort,
+// inclusief zijn eigen bouwdelenlijst en FTA-classificatie (geen verzonnen data).
+function borrowElement(boId, sourceBoCode, sourceElementName){
+  var n = findNode(boId); if(!n) return;
+  n.extraEls = n.extraEls || [];
+  // Voorkom exacte dubbele leningen van hetzelfde bron-element
+  var already = n.extraEls.some(function(ex){
+    return ex.borrowedFrom === sourceBoCode && ex.base === sourceElementName;
+  });
+  if(already){ alert('Dit element is al geleend voor dit beheerobject.'); return; }
+  var srcBo = BOMAP[sourceBoCode];
+  var srcLabel = srcBo ? srcBo.naam : sourceBoCode;
+  var newKey = sourceElementName + '@' + sourceBoCode; // uniek genoeg: bron-BO maakt key uniek
+  n.extraEls.push({
+    base: sourceElementName,
+    key: newKey,
+    label: sourceElementName,
+    borrowedFrom: sourceBoCode,
+    borrowedFromLabel: srcLabel
+  });
+  autoSave();
+  render();
+}
+
+// ── VRIJ (ONGECLASSIFICEERD) ELEMENT TOEVOEGEN — uitzondering, geen bibliotheekdata ──
+function addCustomElement(boId, customName, customToelichting){
+  var n = findNode(boId); if(!n) return;
+  customName = (customName||'').trim();
+  if(!customName){ alert('Geef een naam op voor het vrije element.'); return; }
+  n.extraEls = n.extraEls || [];
+  n.customElData = n.customElData || {}; // bewaart toelichting per custom-key
+  var newKey = 'CUSTOM:' + customName + ':' + Date.now();
+  n.extraEls.push({ base: newKey, key: newKey, label: customName, isCustom: true });
+  n.customElData[newKey] = { toelichting: (customToelichting||'').trim() };
+  autoSave();
+  render();
+}
+
 function removeElementInstance(boId, instanceKey){
   var n = findNode(boId); if(!n) return;
   n.extraEls = (n.extraEls||[]).filter(function(ex){ return ex.key !== instanceKey; });
   // Ruim bijbehorende state op
   if(n.disabledBDs) delete n.disabledBDs[instanceKey];
   if(n.elNotes) delete n.elNotes[instanceKey];
+  if(n.customElData) delete n.customElData[instanceKey];
+  if(n.extraBds) delete n.extraBds[instanceKey];
   if(n.bdNotes){
     Object.keys(n.bdNotes).forEach(function(k){ if(k.indexOf(instanceKey+'||')===0) delete n.bdNotes[k]; });
   }
@@ -3486,17 +3954,417 @@ function getActiveElementInstances(n, bo){
   var result = [];
   bo.elementen.forEach(function(e){
     if(disabled.indexOf(e.element) < 0){
-      result.push({ element:e.element, key:e.element, label:e.element, classificatie:e.classificatie, isDup:false });
+      result.push({ element:e.element, key:e.element, label:e.element, classificatie:e.classificatie, isDup:false, isBorrowed:false, isCustom:false });
     }
   });
   (n.extraEls||[]).forEach(function(ex){
-    // Alleen tonen als het basiselement zelf nog actief is (anders is dupliceren zinloos)
-    if(disabled.indexOf(ex.base) >= 0) return;
+    if(ex.borrowedFrom){
+      // GELEEND element: zoek classificatie op in de BRON-bibliotheek, niet de eigen
+      var srcBo = BOMAP[ex.borrowedFrom];
+      var srcEntry = srcBo ? srcBo.elementen.filter(function(e){ return e.element===ex.base; })[0] : null;
+      result.push({
+        element:ex.base, key:ex.key, label:ex.label||ex.key,
+        classificatie: srcEntry ? srcEntry.classificatie : 'OPTIONEEL',
+        isDup:false, isBorrowed:true, borrowedFromLabel:ex.borrowedFromLabel
+      });
+      return;
+    }
+    if(ex.isCustom){
+      // VRIJ/ongeclassificeerd element: geen JA/OPT/NEE, eigen toelichting
+      result.push({
+        element:ex.base, key:ex.key, label:ex.label||ex.key,
+        classificatie:'CUSTOM', isDup:false, isBorrowed:false, isCustom:true
+      });
+      return;
+    }
+    // Normale DUPLICATIE van een eigen-bibliotheek element
+    if(disabled.indexOf(ex.base) >= 0) return; // alleen tonen als basiselement nog actief is
     var baseEntry = bo.elementen.filter(function(e){ return e.element===ex.base; })[0];
     if(!baseEntry) return;
-    result.push({ element:ex.base, key:ex.key, label:ex.label||ex.key, classificatie:baseEntry.classificatie, isDup:true });
+    result.push({ element:ex.base, key:ex.key, label:ex.label||ex.key, classificatie:baseEntry.classificatie, isDup:true, isBorrowed:false, isCustom:false });
   });
   return result;
+}
+
+
+// ── BOUWDEEL DUPLICATIE (meerdere instanties van hetzelfde bouwdeel binnen één element, bijv. 3x Afsluiter) ──
+function getBouwdeelBase(n, elKey, bdInstanceKey){
+  // Voor een bdInstanceKey zoals 'Afsluiter#2', geef de echte bibliotheeknaam terug ('Afsluiter')
+  var list = (n && n.extraBds) ? (n.extraBds[elKey] || []) : [];
+  for(var i=0;i<list.length;i++){
+    if(list[i].key === bdInstanceKey) return list[i].base;
+  }
+  return bdInstanceKey; // origineel: key === naam
+}
+
+function getBouwdeelLabel(n, elKey, bdInstanceKey){
+  var list = (n && n.extraBds) ? (n.extraBds[elKey] || []) : [];
+  for(var i=0;i<list.length;i++){
+    if(list[i].key === bdInstanceKey) return list[i].label || bdInstanceKey;
+  }
+  return bdInstanceKey;
+}
+
+function duplicateBouwdeel(boId, elKey, baseBd){
+  var n = findNode(boId); if(!n) return;
+  n.extraBds = n.extraBds || {};
+  n.extraBds[elKey] = n.extraBds[elKey] || [];
+  var existingCount = 1; // origineel telt als #1
+  n.extraBds[elKey].forEach(function(ex){ if(ex.base === baseBd) existingCount++; });
+  var newNum = existingCount + 1;
+  var newKey = baseBd + '#' + newNum;
+  n.extraBds[elKey].push({ base: baseBd, key: newKey, label: baseBd + ' #' + newNum });
+  autoSave();
+  // Herbouw alleen het bouwdelen-paneel (geen volledige render() nodig, blijft sneller en behoudt boom-scroll)
+  if(typeof window._refreshBdPanel === 'function') window._refreshBdPanel();
+}
+
+// ── BOUWDEEL LENEN van een ANDER element in de bibliotheek ──
+// sourceElement: de elementnaam waar het bouwdeel origineel bij hoort (bijv. 'Pompinstallatie')
+function borrowBouwdeel(boId, elKey, sourceElement, sourceBdName){
+  var n = findNode(boId); if(!n) return;
+  n.extraBds = n.extraBds || {};
+  n.extraBds[elKey] = n.extraBds[elKey] || [];
+  var already = n.extraBds[elKey].some(function(ex){
+    return ex.borrowedFromElement === sourceElement && ex.base === sourceBdName;
+  });
+  if(already){ alert('Dit bouwdeel is al geleend voor dit element.'); return; }
+  var newKey = sourceBdName + '@' + sourceElement;
+  n.extraBds[elKey].push({
+    base: sourceBdName,
+    key: newKey,
+    label: sourceBdName,
+    borrowedFromElement: sourceElement
+  });
+  autoSave();
+  if(typeof window._refreshBdPanel === 'function') window._refreshBdPanel();
+}
+
+// ── VRIJ (ONGECLASSIFICEERD) BOUWDEEL TOEVOEGEN ──
+function addCustomBouwdeel(boId, elKey, customName, customToelichting){
+  var n = findNode(boId); if(!n) return;
+  customName = (customName||'').trim();
+  if(!customName){ alert('Geef een naam op voor het vrije bouwdeel.'); return; }
+  n.extraBds = n.extraBds || {};
+  n.extraBds[elKey] = n.extraBds[elKey] || [];
+  n.customBdData = n.customBdData || {};
+  var newKey = 'CUSTOM:' + customName + ':' + Date.now();
+  n.extraBds[elKey].push({ base: newKey, key: newKey, label: customName, isCustom: true });
+  n.customBdData[elKey + '||' + newKey] = { toelichting: (customToelichting||'').trim() };
+  autoSave();
+  if(typeof window._refreshBdPanel === 'function') window._refreshBdPanel();
+}
+
+function removeBouwdeelInstance(boId, elKey, bdInstanceKey){
+  var n = findNode(boId); if(!n) return;
+  if(n.extraBds && n.extraBds[elKey]){
+    n.extraBds[elKey] = n.extraBds[elKey].filter(function(ex){ return ex.key !== bdInstanceKey; });
+  }
+  // Ruim bijbehorende state op
+  var fullKey = elKey + '||' + bdInstanceKey;
+  if(n.bdNotes) delete n.bdNotes[fullKey];
+  if(n.components) delete n.components[fullKey];
+  if(n.customBdData) delete n.customBdData[fullKey];
+  if(n.disabledBDs && n.disabledBDs[elKey]){
+    n.disabledBDs[elKey] = n.disabledBDs[elKey].filter(function(k){ return k !== bdInstanceKey; });
+  }
+  autoSave();
+  if(typeof window._refreshBdPanel === 'function') window._refreshBdPanel();
+}
+
+function renameBouwdeelInstance(boId, elKey, bdInstanceKey, newLabel){
+  var n = findNode(boId); if(!n || !n.extraBds || !n.extraBds[elKey]) return;
+  newLabel = (newLabel||'').trim();
+  var list = n.extraBds[elKey];
+  for(var i=0;i<list.length;i++){
+    if(list[i].key === bdInstanceKey){
+      list[i].label = newLabel || list[i].key;
+      break;
+    }
+  }
+  autoSave();
+  if(typeof window._refreshBdPanel === 'function') window._refreshBdPanel();
+}
+
+// Geeft alle bouwdeel-INSTANTIES terug voor een element (origineel + duplicaten),
+// elk als [naam-voor-lib-lookup, classificatie, redenering, instanceKey, displayLabel, isDup]
+function getBouwdeelInstances(n, elKey, baseBdsArray){
+  var result = baseBdsArray.map(function(b){
+    return { base:b[0], cls:b[1], reden:b[2], key:b[0], label:b[0], isDup:false, isBorrowed:false, isCustom:false };
+  });
+  var extra = (n && n.extraBds) ? (n.extraBds[elKey] || []) : [];
+  extra.forEach(function(ex){
+    if(ex.borrowedFromElement){
+      // GELEEND bouwdeel: zoek classificatie/redenering op bij het BRON-element
+      var srcBds = BD ? (BD[ex.borrowedFromElement] || []) : [];
+      var srcEntry = srcBds.filter(function(b){ return b[0]===ex.base; })[0];
+      result.push({
+        base:ex.base, cls: srcEntry ? srcEntry[1] : 'O', reden: srcEntry ? srcEntry[2] : '',
+        key:ex.key, label:ex.label||ex.key, isDup:false, isBorrowed:true, borrowedFromElement:ex.borrowedFromElement
+      });
+      return;
+    }
+    if(ex.isCustom){
+      var customInfo = (n && n.customBdData) ? (n.customBdData[elKey+'||'+ex.key] || {}) : {};
+      result.push({
+        base:ex.base, cls:'CUSTOM', reden: customInfo.toelichting || '',
+        key:ex.key, label:ex.label||ex.key, isDup:false, isBorrowed:false, isCustom:true
+      });
+      return;
+    }
+    var baseEntry = baseBdsArray.filter(function(b){ return b[0]===ex.base; })[0];
+    if(!baseEntry) return; // alleen tonen als basis-bouwdeel nog bestaat
+    result.push({ base:ex.base, cls:baseEntry[1], reden:baseEntry[2], key:ex.key, label:ex.label||ex.key, isDup:true, isBorrowed:false, isCustom:false });
+  });
+  return result;
+}
+
+
+// ── PDF RAPPORTINSTELLINGEN (titel/ondertitel aanpasbaar) ─────────
+var PDF_SETTINGS_KEY = 'pra_pdf_settings_v1';
+var pdfReportTitle    = 'Decompositierapport';
+var pdfReportSubtitle = 'Sturen op prestaties van systemen';
+
+function loadPdfSettings(){
+  try{
+    var raw = localStorage.getItem(PDF_SETTINGS_KEY);
+    if(!raw) return;
+    var d = JSON.parse(raw);
+    if(d.title)    pdfReportTitle    = d.title;
+    if(d.subtitle !== undefined) pdfReportSubtitle = d.subtitle;
+  } catch(e){}
+}
+
+function savePdfSettings(){
+  try{
+    localStorage.setItem(PDF_SETTINGS_KEY, JSON.stringify({ title: pdfReportTitle, subtitle: pdfReportSubtitle }));
+  } catch(e){}
+}
+
+function initPdfSettingsPopover(){
+  var btn      = document.getElementById('btn-pdf-settings');
+  var popover  = document.getElementById('pdf-settings-popover');
+  var titleInp = document.getElementById('pdf-title-inp');
+  var subInp   = document.getElementById('pdf-subtitle-inp');
+  var saveBtn  = document.getElementById('pdf-settings-save');
+  if(!btn || !popover) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    titleInp.value = pdfReportTitle;
+    subInp.value   = pdfReportSubtitle;
+    popover.classList.toggle('vis');
+  });
+
+  saveBtn.addEventListener('click', function(){
+    pdfReportTitle    = (titleInp.value||'').trim() || 'Decompositierapport';
+    pdfReportSubtitle = (subInp.value||'').trim();
+    savePdfSettings();
+    popover.classList.remove('vis');
+  });
+
+  // Sluit popover bij klik buiten
+  document.addEventListener('click', function(e){
+    if(!popover.contains(e.target) && e.target!==btn){
+      popover.classList.remove('vis');
+    }
+  });
+  popover.addEventListener('click', function(e){ e.stopPropagation(); });
+}
+
+
+// ── ELEMENT PICKER MODAL (lenen uit andere bibliotheek of vrij toevoegen) ──
+var _elPickerBoId = null;
+var _elPickerTab = 'library';
+var _elPickerMode = 'element'; // 'element' of 'bouwdeel'
+var _elPickerElKey = null;     // alleen gebruikt in bouwdeel-modus
+
+function openElementPicker(boId){
+  _elPickerBoId = boId;
+  _elPickerMode = 'element';
+  _elPickerElKey = null;
+  _elPickerTab = 'library';
+  var overlay = document.getElementById('el-picker-modal');
+  if(!overlay) return;
+  document.getElementById('picker-modal-title').textContent = 'Element toevoegen';
+  overlay.style.display = 'flex';
+  document.querySelectorAll('.picker-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.ptab==='library'); });
+  buildElPickerBody();
+}
+
+function openBouwdeelPicker(boId, elKey){
+  _elPickerBoId = boId;
+  _elPickerMode = 'bouwdeel';
+  _elPickerElKey = elKey;
+  _elPickerTab = 'library';
+  var overlay = document.getElementById('el-picker-modal');
+  if(!overlay) return;
+  var n = findNode(boId);
+  var displayLbl = n ? getElementLabel(n, elKey) : elKey;
+  document.getElementById('picker-modal-title').textContent = 'Bouwdeel toevoegen aan ' + displayLbl;
+  overlay.style.display = 'flex';
+  document.querySelectorAll('.picker-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.ptab==='library'); });
+  buildElPickerBody();
+}
+
+function closeElementPicker(){
+  var overlay = document.getElementById('el-picker-modal');
+  if(overlay) overlay.style.display = 'none';
+  _elPickerBoId = null;
+  _elPickerElKey = null;
+}
+
+function buildElPickerBody(query){
+  var body = document.getElementById('picker-modal-body');
+  if(!body) return;
+  query = (query||'').toLowerCase();
+  var isElMode = (_elPickerMode === 'element');
+
+  if(_elPickerTab === 'custom'){
+    var itemWoord = isElMode ? 'element' : 'bouwdeel';
+    body.innerHTML =
+      '<div class="picker-custom-form">'+
+        '<label>Naam van het vrije '+itemWoord+'</label>'+
+        '<input type="text" id="picker-custom-name" placeholder="bijv. '+(isElMode?'Bijzondere constructie XYZ':'Speciale flensverbinding')+'">'+
+        '<label>Toelichting (i.p.v. FTA-redenering, want dit '+itemWoord+' is niet bibliotheek-geclassificeerd)</label>'+
+        '<textarea id="picker-custom-toelichting" placeholder="Beschrijf waarom dit '+itemWoord+' hier relevant is..."></textarea>'+
+        '<div class="picker-custom-note">Dit '+itemWoord+' krijgt geen JA/OPT/NEE-classificatie en wordt in rapporten gemarkeerd als \u2018vrij toegevoegd\u2019, zodat duidelijk blijft dat dit een bewuste afwijking is van de standaardbibliotheek.</div>'+
+        '<button class="picker-custom-submit" id="picker-custom-submit">Vrij '+itemWoord+' toevoegen</button>'+
+      '</div>';
+    var submitBtn = document.getElementById('picker-custom-submit');
+    if(submitBtn){
+      submitBtn.addEventListener('click', function(){
+        var nameInp = document.getElementById('picker-custom-name');
+        var toelInp = document.getElementById('picker-custom-toelichting');
+        if(!nameInp.value.trim()){ alert('Geef een naam op voor het vrije '+itemWoord+'.'); return; }
+        if(isElMode){
+          addCustomElement(_elPickerBoId, nameInp.value, toelInp.value);
+        } else {
+          addCustomBouwdeel(_elPickerBoId, _elPickerElKey, nameInp.value, toelInp.value);
+        }
+        closeElementPicker();
+      });
+    }
+    return;
+  }
+
+  var n = findNode(_elPickerBoId);
+
+  if(isElMode){
+    // Tab: uit bibliotheek — doorzoek ALLE elementen van ALLE beheerobjecten
+    var ownBoCode = n ? n.boCode : null;
+    var results = [];
+    if(BOLIB){
+      BOLIB.forEach(function(bo){
+        bo.elementen.forEach(function(el){
+          if(query && el.element.toLowerCase().indexOf(query) < 0) return;
+          results.push({ srcCode: bo.code, srcLabel: bo.naam, itemName: el.element, classificatie: el.classificatie });
+        });
+      });
+    }
+    results.sort(function(a,b){
+      if(a.srcCode===ownBoCode && b.srcCode!==ownBoCode) return -1;
+      if(b.srcCode===ownBoCode && a.srcCode!==ownBoCode) return 1;
+      return a.itemName.localeCompare(b.itemName,'nl');
+    });
+    renderPickerResults(results, query, ownBoCode);
+  } else {
+    // Tab: uit bibliotheek — doorzoek ALLE bouwdelen van ALLE elementen
+    var ownElBase = getElementBase(n, _elPickerElKey);
+    var results2 = [];
+    if(BD){
+      Object.keys(BD).forEach(function(elName2){
+        BD[elName2].forEach(function(b){
+          if(query && b[0].toLowerCase().indexOf(query) < 0) return;
+          results2.push({ srcCode: elName2, srcLabel: elName2, itemName: b[0], classificatie: b[1]==='J'?'JA':b[1]==='O'?'OPTIONEEL':'NEE' });
+        });
+      });
+    }
+    results2.sort(function(a,b){
+      if(a.srcCode===ownElBase && b.srcCode!==ownElBase) return -1;
+      if(b.srcCode===ownElBase && a.srcCode!==ownElBase) return 1;
+      return a.itemName.localeCompare(b.itemName,'nl');
+    });
+    renderPickerResults(results2, query, ownElBase);
+  }
+
+  function renderPickerResults(results, query, ownSourceCode){
+    var limited = results.slice(0, 60);
+    var rowsHtml = limited.map(function(r){
+      var chip = r.classificatie==='JA'?'cja':r.classificatie==='OPTIONEEL'?'cop':'cne';
+      var lbl  = r.classificatie==='OPTIONEEL'?'OPT':r.classificatie;
+      return '<div class="picker-result-row" data-srccode="'+r.srcCode.replace(/"/g,'&quot;')+'" data-itemname="'+r.itemName.replace(/"/g,'&quot;')+'">'+
+        '<span class="echip2 '+chip+'" style="flex-shrink:0">'+lbl+'</span>'+
+        '<span class="picker-result-name">'+r.itemName+'</span>'+
+        '<span class="picker-result-source">'+(isElMode?(r.srcCode+' \u2014 '+r.srcLabel):('uit: '+r.srcLabel))+'</span>'+
+      '</div>';
+    }).join('');
+
+    body.innerHTML =
+      '<input type="text" class="picker-search-inp" id="picker-search-inp" placeholder="'+(isElMode?'Zoek element in alle bibliotheken\u2026':'Zoek bouwdeel in alle elementen\u2026')+'" autofocus>'+
+      '<div id="picker-results">'+(rowsHtml || '<div class="picker-empty">Geen resultaten gevonden'+(query?' voor \u201c'+query+'\u201d':'')+'</div>')+'</div>'+
+      (results.length > 60 ? '<div class="picker-empty" style="padding:8px">'+(results.length-60)+' meer resultaten \u2014 verfijn je zoekopdracht</div>' : '');
+
+    var searchInp = document.getElementById('picker-search-inp');
+    if(searchInp){
+      searchInp.value = query;
+      searchInp.addEventListener('input', function(){
+        var cursorPos = searchInp.selectionStart;
+        var val = searchInp.value;
+        buildElPickerBody(val);
+        var freshInp = document.getElementById('picker-search-inp');
+        if(freshInp){ freshInp.focus(); freshInp.setSelectionRange(cursorPos, cursorPos); }
+      });
+    }
+    document.querySelectorAll('.picker-result-row').forEach(function(row){
+      row.addEventListener('click', function(){
+        var srcCode  = row.dataset.srccode;
+        var itemName = row.dataset.itemname;
+        if(isElMode){
+          if(srcCode === ownSourceCode){
+            var n2 = findNode(_elPickerBoId);
+            if(n2 && n2.disabledEls){
+              n2.disabledEls = n2.disabledEls.filter(function(e){ return e !== itemName; });
+              autoSave(); render();
+            }
+          } else {
+            borrowElement(_elPickerBoId, srcCode, itemName);
+          }
+        } else {
+          if(srcCode === ownSourceCode){
+            // Bouwdeel uit het EIGEN element: gewoon heractiveren i.p.v. lenen
+            var n3 = findNode(_elPickerBoId);
+            if(n3 && n3.disabledBDs && n3.disabledBDs[_elPickerElKey]){
+              n3.disabledBDs[_elPickerElKey] = n3.disabledBDs[_elPickerElKey].filter(function(k){ return k !== itemName; });
+              autoSave();
+              if(typeof window._refreshBdPanel === 'function') window._refreshBdPanel();
+            }
+          } else {
+            borrowBouwdeel(_elPickerBoId, _elPickerElKey, srcCode, itemName);
+          }
+        }
+        closeElementPicker();
+      });
+    });
+  }
+}
+
+function initElementPicker(){
+  var closeBtn = document.getElementById('picker-modal-close');
+  if(closeBtn) closeBtn.addEventListener('click', closeElementPicker);
+  var overlay = document.getElementById('el-picker-modal');
+  if(overlay){
+    overlay.addEventListener('click', function(e){
+      if(e.target === overlay) closeElementPicker(); // klik buiten de modal sluit 'm
+    });
+  }
+  document.querySelectorAll('#el-picker-modal .picker-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      _elPickerTab = tab.dataset.ptab;
+      document.querySelectorAll('#el-picker-modal .picker-tab').forEach(function(t){ t.classList.toggle('active', t===tab); });
+      buildElPickerBody();
+    });
+  });
 }
 
 /* Boot */
@@ -3534,6 +4402,13 @@ document.addEventListener('DOMContentLoaded', function(){
       removeElementInstance(delBtn.dataset.boid, delBtn.dataset.key);
       return;
     }
+    // Element-picker openen (lenen uit andere bibliotheek / vrij toevoegen)
+    var pickerBtn = t.closest('[data-action="openelpicker"]');
+    if(pickerBtn){
+      e.stopPropagation();
+      openElementPicker(pickerBtn.dataset.boid);
+      return;
+    }
     // Bulk select/deselect elements
     var bk = t.closest('[data-bulkel]');
     if(bk){
@@ -3551,10 +4426,23 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   // Delegated resize handle setup
   setupResizeHandles();
+  // Kaart-vergroten knop
+  var mapExpandBtn = document.getElementById('map-expand-btn');
+  if(mapExpandBtn){
+    mapExpandBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      toggleMapExpand();
+    });
+  }
   // Tree search
   initTreeSearch();
   // Boom filter
   initBoomFilter();
+  // PDF rapportinstellingen
+  loadPdfSettings();
+  initPdfSettingsPopover();
+  // Element/bouwdeel picker modal
+  initElementPicker();
 });
 </script>
 </body>
